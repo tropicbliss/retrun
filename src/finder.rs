@@ -20,7 +20,7 @@ pub fn filter_words(words: Vec<String>, guess_units: Vec<Guess>) -> Vec<String> 
                     '2' => Some(Rule::Contains(data.0, idx)),
                     '3' => Some(Rule::Correct(data.0, idx)),
                     '0' => None,
-                    _ => unimplemented!(),
+                    _ => unimplemented!("Unexpected feedback character"),
                 })
                 .flatten()
                 .collect();
