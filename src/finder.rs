@@ -1,12 +1,12 @@
-use crate::cli::GuessUnit;
+use crate::cli::Guess;
 
-enum Guess {
+enum Rule {
     NotContains(char),
     Contains(char, usize),
     Correct(char, usize),
 }
 
-pub fn filter_words(words: Vec<String>, guess_units: Vec<GuessUnit>) -> Vec<String> {
+pub fn filter_words(words: Vec<String>, guess_units: Vec<Guess>) -> Vec<String> {
     let rules: Vec<_> = guess_units
         .into_iter()
         .map(|unit| {
@@ -16,9 +16,9 @@ pub fn filter_words(words: Vec<String>, guess_units: Vec<GuessUnit>) -> Vec<Stri
                 .zip(unit.feedback.chars())
                 .enumerate()
                 .map(|(idx, data)| match data.1 {
-                    '1' => Some(Guess::NotContains(data.0)),
-                    '2' => Some(Guess::Contains(data.0, idx)),
-                    '3' => Some(Guess::Correct(data.0, idx)),
+                    '1' => Some(Rule::NotContains(data.0)),
+                    '2' => Some(Rule::Contains(data.0, idx)),
+                    '3' => Some(Rule::Correct(data.0, idx)),
                     '0' => None,
                     _ => unimplemented!(),
                 })
@@ -32,9 +32,9 @@ pub fn filter_words(words: Vec<String>, guess_units: Vec<GuessUnit>) -> Vec<Stri
         .into_iter()
         .filter(|word| {
             rules.iter().all(|rule| match rule {
-                Guess::NotContains(ch) => !word.contains(*ch),
-                Guess::Correct(ch, idx) => word.chars().nth(*idx).unwrap() == *ch,
-                Guess::Contains(ch, idx) => word.chars().nth(*idx).unwrap() != *ch,
+                Rule::NotContains(letter) => !word.contains(*letter),
+                Rule::Correct(letter, idx) => word.chars().nth(*idx).unwrap() == *letter,
+                Rule::Contains(letter, idx) => word.chars().nth(*idx).unwrap() != *letter,
             })
         })
         .collect()

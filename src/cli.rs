@@ -34,18 +34,18 @@ impl Args {
 }
 
 #[derive(Debug)]
-pub struct GuessUnit {
+pub struct Guess {
     pub guess: String,
     pub feedback: String,
 }
 
-pub fn get_guess_unit(state: String) -> Vec<GuessUnit> {
-    let pairs = state.split(',');
-    pairs
+pub fn get_guesses(state: String) -> Vec<Guess> {
+    let guesses = state.split(',');
+    guesses
         .into_iter()
         .map(|guess| {
             let mut guess_data = guess.split(':');
-            GuessUnit {
+            Guess {
                 guess: guess_data.next().unwrap().to_string(),
                 feedback: guess_data.next().unwrap().to_string(),
             }
