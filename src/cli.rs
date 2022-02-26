@@ -94,8 +94,6 @@ where
 }
 
 pub fn render(mut words: Vec<String>, score_info: CharScore) {
-    if !words.is_empty() {
-        words.sort_by_cached_key(|word| score_info.get_word_score(word));
-        println!("{}", words.last().unwrap());
-    }
+    words.sort_by_cached_key(|word| score_info.get_word_score(word));
+    println!("{}", words.last().expect("Unable to find any words"));
 }
