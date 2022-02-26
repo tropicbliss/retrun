@@ -10,7 +10,7 @@ pub fn filter_words(words: Vec<String>, guess_units: Vec<GuessUnit>) -> Vec<Stri
     let rules: Vec<_> = guess_units
         .into_iter()
         .map(|unit| {
-            let result: Vec<Guess> = unit
+            let result: Vec<_> = unit
                 .guess
                 .chars()
                 .zip(unit.feedback.chars())
