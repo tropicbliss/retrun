@@ -20,7 +20,7 @@ pub fn filter_words(words: Vec<String>, guess_units: Vec<Guess>) -> Vec<String> 
                     '2' => Some(Rule::Contains(data.0, idx)),
                     '3' => Some(Rule::Correct(data.0, idx)),
                     '0' => None,
-                    _ => unimplemented!("Unexpected feedback character"),
+                    _ => unimplemented!("Unexpected feedback segment character"),
                 })
                 .flatten()
                 .collect();
@@ -33,8 +33,12 @@ pub fn filter_words(words: Vec<String>, guess_units: Vec<Guess>) -> Vec<String> 
         .filter(|word| {
             rules.iter().all(|rule| match rule {
                 Rule::NotContains(letter) => !word.contains(*letter),
-                Rule::Correct(letter, idx) => word.chars().nth(*idx).unwrap() == *letter,
-                Rule::Contains(letter, idx) => word.chars().nth(*idx).unwrap() != *letter,
+                Rule::Correct(letter, idx) => {
+                    word.chars().nth(*idx).expect("Unexpected word length") == *letter
+                }
+                Rule::Contains(letter, idx) => {
+                    word.chars().nth(*idx).expect("Unexpected word length") != *letter
+                }
             })
         })
         .collect()

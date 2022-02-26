@@ -46,8 +46,14 @@ pub fn get_guesses(state: String) -> Vec<Guess> {
         .map(|guess| {
             let mut guess_data = guess.split(':');
             Guess {
-                guess: guess_data.next().unwrap().to_string(),
-                feedback: guess_data.next().unwrap().to_string(),
+                guess: guess_data
+                    .next()
+                    .expect("Guess segment not found")
+                    .to_string(),
+                feedback: guess_data
+                    .next()
+                    .expect("Feedback segment not found")
+                    .to_string(),
             }
         })
         .collect()
