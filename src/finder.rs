@@ -7,7 +7,6 @@ enum Rule {
 }
 
 pub fn filter_words(words: Vec<String>, guess_units: Vec<Guess>) -> Vec<String> {
-    println!("{:?}", words);
     let rules: Vec<_> = guess_units
         .into_iter()
         .map(|unit| {
