@@ -39,7 +39,7 @@ pub struct Guess {
     pub feedback: String,
 }
 
-pub fn get_guesses(state: String) -> Vec<Guess> {
+pub fn get_guesses(state: &str) -> Vec<Guess> {
     let guesses = state.split(',');
     guesses
         .into_iter()
@@ -93,7 +93,7 @@ where
     vec.dedup();
 }
 
-pub fn render(mut words: Vec<String>, score_info: CharScore) {
+pub fn render(mut words: Vec<String>, score_info: &CharScore) {
     words.sort_by_cached_key(|word| score_info.get_word_score(word));
     println!("{}", words.last().expect("Unable to find any words"));
 }
