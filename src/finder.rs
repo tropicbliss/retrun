@@ -1,6 +1,6 @@
+use crate::cli::Guess;
 use std::collections::HashMap;
 
-use crate::cli::Guess;
 enum Rule {
     NotContains(char),
     Contains(char, usize),
