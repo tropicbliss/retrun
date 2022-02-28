@@ -82,6 +82,7 @@ pub fn filter_words(words: Vec<String>, guess_units: Vec<Guess>) -> Vec<String> 
                 }
                 Rule::Contains(letter, idx) => {
                     word.chars().nth(*idx).expect("Unexpected word length") != *letter
+                        && word.contains(*letter)
                 }
             })
         })
