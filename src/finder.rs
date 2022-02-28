@@ -27,11 +27,9 @@ pub fn filter_words(words: Vec<String>, guess_units: Vec<Guess>) -> Vec<String> 
                 .collect();
             result
                 .iter()
-                .filter_map(|rule| {
-                    if let Rule::NotContains(letter) = rule {
-                        return Some(letter);
-                    }
-                    None
+                .filter_map(|rule| match rule {
+                    Rule::NotContains(letter) => Some(letter),
+                    _ => None,
                 })
                 .for_each(|letter| {
                     let number_of_occurences = result
