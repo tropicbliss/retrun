@@ -73,7 +73,7 @@ pub fn filter_words(words: Vec<String>, guess_units: Vec<Guess>) -> Vec<String> 
                         word.chars()
                             .enumerate()
                             .all(|(idx, l)| l != *letter || correct_idxs.contains(&idx))
-                            || word.chars().filter(|l| l == letter).count()
+                            && word.chars().filter(|l| l == letter).count()
                                 == *possible_lengths.get(letter).unwrap()
                     }
                 }
