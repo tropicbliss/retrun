@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::cli::Guess;
 enum Rule {
     NotContains(char),
@@ -6,6 +8,7 @@ enum Rule {
 }
 
 pub fn filter_words(words: Vec<String>, guess_units: Vec<Guess>) -> Vec<String> {
+    let mut possible_lengths: HashMap<char, usize> = HashMap::new();
     let rules: Vec<_> = guess_units
         .into_iter()
         .flat_map(|unit| {
@@ -22,6 +25,28 @@ pub fn filter_words(words: Vec<String>, guess_units: Vec<Guess>) -> Vec<String> 
                     _ => unimplemented!("Unexpected feedback segment character"),
                 })
                 .collect();
+            result
+                .iter()
+                .filter_map(|rule| {
+                    if let Rule::NotContains(letter) = rule {
+                        return Some(letter);
+                    }
+                    None
+                })
+                .for_each(|letter| {
+                    let number_of_occurences = result
+                        .iter()
+                        .filter_map(|rule| {
+                            if let Rule::Contains(l, _) = rule {
+                                if l == letter {
+                                    return Some(letter);
+                                }
+                            }
+                            None
+                        })
+                        .count();
+                    possible_lengths.insert(*letter, number_of_occurences);
+                });
             result
         })
         .collect();
@@ -48,6 +73,8 @@ pub fn filter_words(words: Vec<String>, guess_units: Vec<Guess>) -> Vec<String> 
                         word.chars()
                             .enumerate()
                             .all(|(idx, l)| l != *letter || correct_idxs.contains(&idx))
+                            || word.chars().filter(|l| l == letter).count()
+                                == *possible_lengths.get(letter).unwrap()
                     }
                 }
                 Rule::Correct(letter, idx) => {
