@@ -36,13 +36,11 @@ pub fn filter_words(words: Vec<String>, guess_units: Vec<Guess>) -> Vec<String> 
                 .for_each(|letter| {
                     let number_of_occurences = result
                         .iter()
-                        .filter_map(|rule| {
-                            if let Rule::Contains(l, _) = rule {
-                                if l == letter {
-                                    return Some(letter);
-                                }
+                        .filter_map(|rule| match rule {
+                            Rule::Contains(l, _) | Rule::Correct(l, _) if l == letter => {
+                                Some(letter)
                             }
-                            None
+                            _ => None,
                         })
                         .count();
                     possible_lengths.insert(*letter, number_of_occurences);
@@ -50,38 +48,20 @@ pub fn filter_words(words: Vec<String>, guess_units: Vec<Guess>) -> Vec<String> 
             result
         })
         .collect();
-    let correct_rules: Vec<_> = rules
-        .iter()
-        .filter_map(|rule| {
-            if let Rule::Correct(letter, idx) = rule {
-                return Some((*letter, *idx));
-            }
-            None
-        })
-        .collect();
     words
         .into_iter()
         .filter(|word| {
             rules.iter().all(|rule| match rule {
                 Rule::NotContains(letter) => {
-                    !word.contains(*letter) || {
-                        let correct_idxs: Vec<_> = correct_rules
-                            .iter()
-                            .filter(|data| data.0 == *letter)
-                            .map(|data| data.1)
-                            .collect();
-                        word.chars()
-                            .enumerate()
-                            .all(|(idx, l)| l != *letter || correct_idxs.contains(&idx))
-                            || word.chars().filter(|l| l == letter).count()
-                                == *possible_lengths.get(letter).unwrap()
-                    }
+                    !word.contains(*letter)
+                        || &word.chars().filter(|l| l == letter).count()
+                            == possible_lengths.get(letter).unwrap()
                 }
                 Rule::Correct(letter, idx) => {
-                    word.chars().nth(*idx).expect("Unexpected word length") == *letter
+                    &word.chars().nth(*idx).expect("Unexpected word length") == letter
                 }
                 Rule::Contains(letter, idx) => {
-                    word.chars().nth(*idx).expect("Unexpected word length") != *letter
+                    &word.chars().nth(*idx).expect("Unexpected word length") != letter
                         && word.contains(*letter)
                 }
             })
