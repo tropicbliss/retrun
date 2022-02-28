@@ -7,9 +7,9 @@ enum Rule {
     Correct(char, usize),
 }
 
-pub fn filter_words(words: Vec<String>, guess_units: Vec<Guess>) -> Vec<String> {
+pub fn filter_words(words: Vec<String>, guesses: Vec<Guess>) -> Vec<String> {
     let mut possible_lengths: HashMap<char, usize> = HashMap::new();
-    let rules: Vec<_> = guess_units
+    let rules: Vec<_> = guesses
         .into_iter()
         .flat_map(|unit| {
             let result: Vec<_> = unit
