@@ -33,7 +33,6 @@ impl Args {
     }
 }
 
-#[derive(Debug)]
 pub struct Guess {
     pub guess: String,
     pub feedback: String,
