@@ -1,4 +1,5 @@
 use clap::Parser;
+use std::io::{self, Result, Write};
 use std::{collections::HashMap, path::PathBuf};
 
 #[derive(Parser)]
@@ -96,11 +97,18 @@ where
     vec.dedup();
 }
 
-pub fn render(mut words: Vec<String>, score_info: &CharScore, show_count: bool) {
+pub fn render(mut words: Vec<String>, score_info: &CharScore, show_count: bool) -> Result<()> {
+    let stdout = io::stdout();
+    let mut handle = io::BufWriter::new(stdout);
     words.sort_by_cached_key(|word| score_info.get_word_score(word));
-    println!("{}", words.last().expect("Unable to find any words"));
+    writeln!(
+        handle,
+        "{}",
+        words.last().expect("Unable to find any words")
+    )?;
     if show_count {
-        println!();
-        println!("Number of result(s): {}", words.len());
+        writeln!(handle)?;
+        writeln!(handle, "Number of result(s): {}", words.len())?;
     }
+    Ok(())
 }
