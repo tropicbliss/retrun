@@ -25,6 +25,10 @@ pub struct Args {
     /// Input file
     #[clap(short, long, default_value = "wordlist.txt")]
     pub wordlist: PathBuf,
+
+    /// Show number of results
+    #[clap(short, long)]
+    pub count: bool,
 }
 
 impl Args {
@@ -93,7 +97,11 @@ where
     vec.dedup();
 }
 
-pub fn render(mut words: Vec<String>, score_info: &CharScore) {
+pub fn render(mut words: Vec<String>, score_info: &CharScore, show_count: bool) {
     words.sort_by_cached_key(|word| score_info.get_word_score(word));
     println!("{}", words.last().expect("Unable to find any words"));
+    if show_count {
+        println!();
+        println!("Number of result(s): {}", words.len());
+    }
 }

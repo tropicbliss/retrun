@@ -10,5 +10,5 @@ fn main() {
     let words = fs::get_words(&args.wordlist);
     let char_scores = cli::CharScore::new(&words);
     let filtered_words = finder::filter_words(words, guess_units);
-    cli::render(filtered_words, &char_scores);
+    cli::render(filtered_words, &char_scores, args.count);
 }
