@@ -109,5 +109,6 @@ pub fn render(mut words: Vec<String>, score_info: &CharScore, show_count: bool) 
     if show_count {
         write!(handle, " ({})", words.len())?;
     }
+    writeln!(handle)?;
     Ok(())
 }
