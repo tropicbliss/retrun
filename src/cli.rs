@@ -101,14 +101,13 @@ pub fn render(mut words: Vec<String>, score_info: &CharScore, show_count: bool) 
     let stdout = io::stdout();
     let mut handle = io::BufWriter::new(stdout);
     words.sort_by_cached_key(|word| score_info.get_word_score(word));
-    writeln!(
+    write!(
         handle,
         "{}",
         words.last().expect("Unable to find any words")
     )?;
     if show_count {
-        writeln!(handle)?;
-        writeln!(handle, "Number of result(s): {}", words.len())?;
+        write!(handle, " ({})", words.len())?;
     }
     Ok(())
 }
