@@ -99,7 +99,8 @@ where
 
 pub fn render(mut words: Vec<String>, score_info: &CharScore, show_count: bool) -> Result<()> {
     let stdout = io::stdout();
-    let mut handle = io::BufWriter::new(stdout);
+    let handle = stdout.lock();
+    let mut handle = io::BufWriter::new(handle);
     words.sort_by_cached_key(|word| score_info.get_word_score(word));
     write!(
         handle,
