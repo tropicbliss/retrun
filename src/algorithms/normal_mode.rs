@@ -47,7 +47,7 @@ impl Guesser for NormalMode {
                 for candidate in &words {
                     let g: Vec<_> = word
                         .bytes()
-                        .zip(pattern.into_iter())
+                        .zip(pattern.iter())
                         .enumerate()
                         .map(|(idx, (letter, rule))| match rule {
                             Correctness::Correct => Rule::Correct(letter, idx),
@@ -65,7 +65,7 @@ impl Guesser for NormalMode {
                 // TODO: apply sigmoid
                 let p_of_this_pattern = in_pattern_total as f64 / remaining_count as f64;
                 sum += p_of_this_pattern * p_of_this_pattern.log2();
-                return true;
+                true
             };
             patterns.retain(check_pattern);
             let p_word = count as f64 / remaining_count as f64;
