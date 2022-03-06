@@ -12948,5 +12948,4 @@ pub static WORDS: phf::Map<&str, usize> = phf_map! {
     "zygon" => 1063,
     "zymes" => 113,
     "zymic" => 4,
-
 };
