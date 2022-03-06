@@ -79,8 +79,11 @@ pub fn render(mut words: Vec<String>, score_info: &CharScore, show_count: bool) 
 }
 
 enum Rule {
-    Wrong(char),
-    Misplaced(char, usize),
+    /// Grey
+    Missing(char),
+    /// Yellow
+    Present(char, usize),
+    /// Green
     Correct(char, usize),
 }
 
@@ -95,8 +98,8 @@ pub fn filter_words(words: Vec<String>, guesses: Vec<Guess>) -> Vec<String> {
                 .zip(unit.mask.chars())
                 .enumerate()
                 .filter_map(|(idx, data)| match data.1 {
-                    '1' => Some(Rule::Wrong(data.0)),
-                    '2' => Some(Rule::Misplaced(data.0, idx)),
+                    '1' => Some(Rule::Missing(data.0)),
+                    '2' => Some(Rule::Present(data.0, idx)),
                     '3' => Some(Rule::Correct(data.0, idx)),
                     '0' => None,
                     _ => unimplemented!("Unexpected feedback segment character"),
@@ -105,14 +108,14 @@ pub fn filter_words(words: Vec<String>, guesses: Vec<Guess>) -> Vec<String> {
             result
                 .iter()
                 .filter_map(|rule| match rule {
-                    Rule::Wrong(letter) => Some(letter),
+                    Rule::Missing(letter) => Some(letter),
                     _ => None,
                 })
                 .for_each(|letter| {
                     let number_of_occurences = result
                         .iter()
                         .filter_map(|rule| match rule {
-                            Rule::Misplaced(l, _) | Rule::Correct(l, _) if l == letter => {
+                            Rule::Present(l, _) | Rule::Correct(l, _) if l == letter => {
                                 Some(letter)
                             }
                             _ => None,
@@ -127,7 +130,7 @@ pub fn filter_words(words: Vec<String>, guesses: Vec<Guess>) -> Vec<String> {
         .into_iter()
         .filter(|word| {
             rules.iter().all(|rule| match rule {
-                Rule::Wrong(letter) => {
+                Rule::Missing(letter) => {
                     !word.contains(*letter)
                         || &word.chars().filter(|l| l == letter).count()
                             == possible_lengths.get(letter).unwrap()
@@ -135,7 +138,7 @@ pub fn filter_words(words: Vec<String>, guesses: Vec<Guess>) -> Vec<String> {
                 Rule::Correct(letter, idx) => {
                     &word.chars().nth(*idx).expect("Unexpected word length") == letter
                 }
-                Rule::Misplaced(letter, idx) => {
+                Rule::Present(letter, idx) => {
                     &word.chars().nth(*idx).expect("Unexpected word length") != letter
                         && word.contains(*letter)
                 }
