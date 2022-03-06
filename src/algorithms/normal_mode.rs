@@ -39,6 +39,7 @@ impl Guesser for NormalMode {
         let remaining_count: usize = words.iter().map(|word| dictionary::WORDS[word]).sum();
         let mut best: Option<Candidate> = None;
         for word in &words {
+            let count = dictionary::WORDS[word];
             let mut sum = 0.0;
             for pattern in Correctness::patterns() {
                 let mut in_pattern_total = 0;
@@ -64,7 +65,8 @@ impl Guesser for NormalMode {
                 let p_of_this_pattern = in_pattern_total as f64 / remaining_count as f64;
                 sum += p_of_this_pattern * p_of_this_pattern.log2();
             }
-            let goodness = -sum;
+            let p_word = count as f64 / remaining_count as f64;
+            let goodness = p_word * -sum;
             if let Some(c) = &best {
                 if goodness > c.goodness {
                     best = Some(Candidate { word, goodness });

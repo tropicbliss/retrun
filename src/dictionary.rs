@@ -1,6 +1,6 @@
 use phf::phf_map;
 
-pub static WORDS: phf::Map<&str, usize> = phf_map! {
+pub static WORDS: phf::Map<&'static str, usize> = phf_map! {
     "aahed" => 943,
     "aalii" => 14,
     "aargh" => 738,
