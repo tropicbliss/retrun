@@ -25,7 +25,7 @@ pub struct Args {
     #[clap(global = true)]
     pub state: String,
 
-    /// Show number of results (if `hard_mode` is set to false, the number of results shown will always be 1)
+    /// Show number of results
     #[clap(short, long)]
     pub count: bool,
 
@@ -58,11 +58,7 @@ where
     let mut handle = io::BufWriter::new(handle);
     write!(handle, "{}", best_word)?;
     if args.count {
-        if args.hard_mode {
-            write!(handle, " ({})", word_count)?;
-        } else {
-            write!(handle, " (1)")?;
-        }
+        write!(handle, " ({})", word_count)?;
     }
     writeln!(handle)?;
     Ok(())
