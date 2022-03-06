@@ -1,7 +1,8 @@
 #![warn(clippy::pedantic)]
 
 use clap::Parser;
-use std::path::{Path, PathBuf};
+use retrun::Guesser;
+use std::io::{self, Result, Write};
 
 #[derive(Parser)]
 #[clap(author, version, about)]
@@ -24,24 +25,41 @@ pub struct Args {
     #[clap(global = true)]
     pub state: String,
 
-    /// Input file
-    #[clap(short, long, default_value = "wordlist.txt")]
-    pub wordlist: PathBuf,
-
-    /// Show number of results
+    /// Show number of results (if `hard_mode` is set to false, the number of results shown will always be 1)
     #[clap(short, long)]
     pub count: bool,
+
+    /// Hard mode
+    #[clap(short, long)]
+    pub hard_mode: bool,
 }
 
 fn main() {
     let args = Args::parse();
-    play(&args.state, &args.wordlist, args.count);
+    if args.hard_mode {
+        play(retrun::algorithms::HardMode::new, args)
+    } else {
+        play(retrun::algorithms::NormalMode::new, args)
+    }
+    .expect("Failed to render CLI");
 }
 
-fn play(state: &str, wordlist: &Path, count: bool) {
-    let guess_units = retrun::get_guesses(state);
-    let words = retrun::get_words(wordlist);
-    let char_scores = retrun::CharScore::new(&words);
-    let filtered_words = retrun::filter_words(words, guess_units);
-    retrun::render(filtered_words, &char_scores, count).expect("Failed to render CLI");
+fn play<G>(mut mk: impl FnMut() -> G, args: Args) -> Result<()>
+where
+    G: Guesser,
+{
+    let guess_units = retrun::get_guesses(&args.state);
+    let filtered_words = retrun::filter_words(guess_units);
+    let guesser = (mk)();
+    let word_count = filtered_words.len();
+    let best_word = retrun::Wordle::play(filtered_words, guesser);
+    let stdout = io::stdout();
+    let handle = stdout.lock();
+    let mut handle = io::BufWriter::new(handle);
+    write!(handle, "{}", best_word)?;
+    if args.count {
+        write!(handle, " ({})", word_count)?;
+    }
+    writeln!(handle)?;
+    Ok(())
 }

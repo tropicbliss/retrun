@@ -1,10 +1,23 @@
+pub mod algorithms;
+pub mod dictionary;
+
 use std::collections::HashMap;
-use std::io::{self, Result, Write};
-use std::{fs::read_to_string, path::Path};
 
 pub struct Guess {
     pub word: String,
     pub mask: String,
+}
+
+pub trait Guesser {
+    fn guess(&self, words: Vec<&'static str>) -> &'static str;
+}
+
+pub struct Wordle;
+
+impl Wordle {
+    pub fn play<G: Guesser>(filtered_words: Vec<&'static str>, guesser: G) -> &'static str {
+        guesser.guess(filtered_words)
+    }
 }
 
 pub fn get_guesses(state: &str) -> Vec<Guess> {
@@ -27,57 +40,6 @@ pub fn get_guesses(state: &str) -> Vec<Guess> {
         .collect()
 }
 
-pub struct CharScore {
-    char_score: HashMap<char, usize>,
-}
-
-impl CharScore {
-    pub fn new(words: &[String]) -> Self {
-        let mut char_score = HashMap::new();
-        for word in words {
-            for ch in word.chars() {
-                let counter = char_score.entry(ch).or_insert(0);
-                *counter += 1;
-            }
-        }
-        Self { char_score }
-    }
-
-    fn get_word_score(&self, word: &str) -> usize {
-        let mut letters = word.chars().collect();
-        true_dedup(&mut letters);
-        letters
-            .into_iter()
-            .map(|letter| self.char_score.get(&letter).unwrap())
-            .sum()
-    }
-}
-
-fn true_dedup<T>(vec: &mut Vec<T>)
-where
-    T: Ord,
-{
-    vec.sort_unstable();
-    vec.dedup();
-}
-
-pub fn render(mut words: Vec<String>, score_info: &CharScore, show_count: bool) -> Result<()> {
-    words.sort_by_cached_key(|word| score_info.get_word_score(word));
-    let stdout = io::stdout();
-    let handle = stdout.lock();
-    let mut handle = io::BufWriter::new(handle);
-    write!(
-        handle,
-        "{}",
-        words.last().expect("Unable to find any words")
-    )?;
-    if show_count {
-        write!(handle, " ({})", words.len())?;
-    }
-    writeln!(handle)?;
-    Ok(())
-}
-
 enum Rule {
     /// Grey
     Wrong(char),
@@ -87,7 +49,7 @@ enum Rule {
     Correct(char, usize),
 }
 
-pub fn filter_words(words: Vec<String>, history: Vec<Guess>) -> Vec<String> {
+pub fn filter_words(history: Vec<Guess>) -> Vec<&'static str> {
     let mut possible_lengths: HashMap<char, usize> = HashMap::new();
     let rules: Vec<_> = history
         .into_iter()
@@ -126,8 +88,9 @@ pub fn filter_words(words: Vec<String>, history: Vec<Guess>) -> Vec<String> {
             result
         })
         .collect();
-    words
+    dictionary::WORDS
         .into_iter()
+        .map(|entry| entry.0)
         .filter(|word| {
             rules.iter().all(|rule| match rule {
                 Rule::Wrong(letter) => {
@@ -144,11 +107,6 @@ pub fn filter_words(words: Vec<String>, history: Vec<Guess>) -> Vec<String> {
                 }
             })
         })
+        .map(|word| *word)
         .collect()
-}
-
-pub fn get_words(path: &Path) -> Vec<String> {
-    let file =
-        read_to_string(&path).unwrap_or_else(|_| panic!("Unable to open {}", path.display()));
-    file.split_whitespace().map(ToString::to_string).collect()
 }
