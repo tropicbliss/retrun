@@ -34,6 +34,9 @@ impl Correctness {
 
 impl Guesser for NormalMode {
     fn guess(&self, words: Vec<&'static str>) -> &'static str {
+        if words.len() == 1 {
+            return words[0];
+        }
         let remaining_count: usize = words.iter().map(|word| dictionary::WORDS[word]).sum();
         let mut best: Option<Candidate> = None;
         for word in &words {
