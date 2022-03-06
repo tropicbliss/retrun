@@ -8,7 +8,6 @@ description = "A simple and fast Wordle word finder"
 
 [dependencies]
 clap = { version = "3.0.14", features = ["derive"] }
-rayon = "1.5.1"
 
 [profile.release]
 lto = "fat"
