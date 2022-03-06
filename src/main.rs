@@ -37,14 +37,14 @@ pub struct Args {
 fn main() {
     let args = Args::parse();
     if args.hard_mode {
-        play(retrun::algorithms::HardMode::new, args)
+        play(retrun::algorithms::HardMode::new, &args)
     } else {
-        play(retrun::algorithms::NormalMode::new, args)
+        play(retrun::algorithms::NormalMode::new, &args)
     }
     .expect("Failed to render CLI");
 }
 
-fn play<G>(mut mk: impl FnMut() -> G, args: Args) -> Result<()>
+fn play<G>(mut mk: impl FnMut() -> G, args: &Args) -> Result<()>
 where
     G: Guesser,
 {

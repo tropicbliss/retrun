@@ -15,3 +15,9 @@ impl HardMode {
         Self {}
     }
 }
+
+impl Default for HardMode {
+    fn default() -> Self {
+        Self::new()
+    }
+}

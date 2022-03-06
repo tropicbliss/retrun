@@ -116,3 +116,9 @@ fn matches(word: &'static str, ruleset: Vec<Rule>) -> bool {
         }
     })
 }
+
+impl Default for NormalMode {
+    fn default() -> Self {
+        Self::new()
+    }
+}

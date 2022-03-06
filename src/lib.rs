@@ -107,6 +107,6 @@ pub fn filter_words(history: Vec<Guess>) -> Vec<&'static str> {
                 }
             })
         })
-        .map(|word| *word)
+        .copied()
         .collect()
 }
