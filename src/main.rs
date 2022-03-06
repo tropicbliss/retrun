@@ -52,7 +52,7 @@ where
     let filtered_words = retrun::filter_words(guess_units);
     let guesser = (mk)();
     let mut word_count = filtered_words.len();
-    if word_count == 0 && !args.hard_mode {
+    if word_count == 0 {
         word_count = 1;
     }
     let best_word = retrun::Wordle::play(filtered_words, guesser);
