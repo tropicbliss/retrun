@@ -65,7 +65,6 @@ impl Guesser for NormalMode {
                 if in_pattern_total == 0 {
                     return false;
                 }
-                // TODO: apply sigmoid
                 let p_of_this_pattern = in_pattern_total as f64 / remaining_count as f64;
                 sum += p_of_this_pattern * p_of_this_pattern.log2();
                 true
