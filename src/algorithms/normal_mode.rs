@@ -34,9 +34,6 @@ impl Correctness {
 
 impl Guesser for NormalMode {
     fn guess(&self, words: Vec<&'static str>) -> &'static str {
-        if words.is_empty() {
-            return "tares";
-        }
         let remaining_count: usize = words.iter().map(|word| dictionary::WORDS[word]).sum();
         let mut best: Option<Candidate> = None;
         for word in &words {
@@ -73,7 +70,7 @@ impl Guesser for NormalMode {
                 best = Some(Candidate { word, goodness });
             }
         }
-        best.unwrap().word
+        best.expect("Unable to find any words").word
     }
 }
 
