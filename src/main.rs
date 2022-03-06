@@ -58,7 +58,11 @@ where
     let mut handle = io::BufWriter::new(handle);
     write!(handle, "{}", best_word)?;
     if args.count {
-        write!(handle, " ({})", word_count)?;
+        if args.hard_mode {
+            write!(handle, " ({})", word_count)?;
+        } else {
+            write!(handle, " (1)")?;
+        }
     }
     writeln!(handle)?;
     Ok(())
