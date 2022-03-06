@@ -6,9 +6,6 @@ authors = ["tropicbliss <tropicbliss@protonmail.com>"]
 license = "MIT"
 description = "A simple and fast Wordle word finder"
 
-[profile.release]
-debug = true
-
 [dependencies]
 clap = { version = "3", features = ["derive"] }
 itertools = "0.10"

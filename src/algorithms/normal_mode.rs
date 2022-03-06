@@ -3,7 +3,6 @@ use std::collections::HashMap;
 
 pub struct NormalMode;
 
-#[derive(Debug, Copy, Clone)]
 pub struct Candidate {
     word: &'static str,
     goodness: f64,
@@ -45,7 +44,7 @@ impl Guesser for NormalMode {
                 let mut in_pattern_total = 0;
                 for candidate in &words {
                     let g: Vec<_> = word
-                        .chars()
+                        .bytes()
                         .zip(pattern.into_iter())
                         .enumerate()
                         .map(|(idx, (letter, rule))| match rule {
@@ -61,11 +60,12 @@ impl Guesser for NormalMode {
                 if in_pattern_total == 0 {
                     continue;
                 }
+                // TODO: apply sigmoid
                 let p_of_this_pattern = in_pattern_total as f64 / remaining_count as f64;
                 sum += p_of_this_pattern * p_of_this_pattern.log2();
             }
             let goodness = -sum;
-            if let Some(c) = best {
+            if let Some(c) = &best {
                 if goodness > c.goodness {
                     best = Some(Candidate { word, goodness });
                 }
@@ -84,7 +84,7 @@ impl NormalMode {
 }
 
 fn matches(word: &'static str, ruleset: Vec<Rule>) -> bool {
-    let mut possible_lengths: HashMap<char, usize> = HashMap::new();
+    let mut possible_lengths: HashMap<u8, usize> = HashMap::new();
     ruleset
         .iter()
         .filter_map(|rule| match rule {
@@ -103,16 +103,16 @@ fn matches(word: &'static str, ruleset: Vec<Rule>) -> bool {
         });
     ruleset.iter().all(|rule| match rule {
         Rule::Wrong(letter) => {
-            !word.contains(*letter)
-                || &word.chars().filter(|l| l == letter).count()
+            !word.bytes().any(|l| letter == &l)
+                || &word.bytes().filter(|l| l == letter).count()
                     == possible_lengths.get(letter).unwrap()
         }
         Rule::Correct(letter, idx) => {
-            &word.chars().nth(*idx).expect("Unexpected word length") == letter
+            word.as_bytes().get(*idx).expect("Unexpected word length") == letter
         }
         Rule::Misplaced(letter, idx) => {
-            &word.chars().nth(*idx).expect("Unexpected word length") != letter
-                && word.contains(*letter)
+            word.as_bytes().get(*idx).expect("Unexpected word length") != letter
+                && !word.bytes().any(|l| letter == &l)
         }
     })
 }

@@ -42,28 +42,28 @@ pub fn get_guesses(state: &str) -> Vec<Guess> {
 
 enum Rule {
     /// Grey
-    Wrong(char),
+    Wrong(u8),
     /// Yellow
-    Misplaced(char, usize),
+    Misplaced(u8, usize),
     /// Green
-    Correct(char, usize),
+    Correct(u8, usize),
 }
 
 pub fn filter_words(history: Vec<Guess>) -> Vec<&'static str> {
-    let mut possible_lengths: HashMap<char, usize> = HashMap::new();
+    let mut possible_lengths: HashMap<u8, usize> = HashMap::new();
     let rules: Vec<_> = history
         .into_iter()
         .flat_map(|unit| {
             let result: Vec<_> = unit
                 .word
-                .chars()
-                .zip(unit.mask.chars())
+                .bytes()
+                .zip(unit.mask.bytes())
                 .enumerate()
                 .filter_map(|(idx, data)| match data.1 {
-                    '1' => Some(Rule::Wrong(data.0)),
-                    '2' => Some(Rule::Misplaced(data.0, idx)),
-                    '3' => Some(Rule::Correct(data.0, idx)),
-                    '0' => None,
+                    b'1' => Some(Rule::Wrong(data.0)),
+                    b'2' => Some(Rule::Misplaced(data.0, idx)),
+                    b'3' => Some(Rule::Correct(data.0, idx)),
+                    b'0' => None,
                     _ => unimplemented!("Unexpected feedback segment character"),
                 })
                 .collect();
@@ -97,16 +97,16 @@ pub fn filter_words(history: Vec<Guess>) -> Vec<&'static str> {
         .filter(|word| {
             rules.iter().all(|rule| match rule {
                 Rule::Wrong(letter) => {
-                    !word.contains(*letter)
-                        || &word.chars().filter(|l| l == letter).count()
+                    !word.bytes().any(|l| letter == &l)
+                        || &word.bytes().filter(|l| l == letter).count()
                             == possible_lengths.get(letter).unwrap()
                 }
                 Rule::Correct(letter, idx) => {
-                    &word.chars().nth(*idx).expect("Unexpected word length") == letter
+                    word.as_bytes().get(*idx).expect("Unexpected word length") == letter
                 }
                 Rule::Misplaced(letter, idx) => {
-                    &word.chars().nth(*idx).expect("Unexpected word length") != letter
-                        && word.contains(*letter)
+                    word.as_bytes().get(*idx).expect("Unexpected word length") != letter
+                        && !word.bytes().any(|l| letter == &l)
                 }
             })
         })
