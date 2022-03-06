@@ -1,7 +1,6 @@
 #![warn(clippy::pedantic)]
 
 use clap::Parser;
-use retrun::Guesser;
 use std::io::{self, Result, Write};
 
 #[derive(Parser)]
@@ -28,36 +27,23 @@ pub struct Args {
     /// Show number of results
     #[clap(short, long)]
     pub count: bool,
-
-    /// Hard mode
-    #[clap(short, long)]
-    pub hard_mode: bool,
 }
 
 fn main() {
     let args = Args::parse();
-    if args.hard_mode {
-        play(retrun::algorithms::HardMode::new, &args)
-    } else {
-        play(retrun::algorithms::NormalMode::new, &args)
-    }
-    .expect("Failed to render CLI");
-}
-
-fn play<G>(mut mk: impl FnMut() -> G, args: &Args) -> Result<()>
-where
-    G: Guesser,
-{
     let guess_units = retrun::get_guesses(&args.state);
     let filtered_words = retrun::filter_words(guess_units);
-    let guesser = (mk)();
     let word_count = filtered_words.len();
-    let best_word = retrun::Wordle::play(filtered_words, guesser);
+    let best_word = retrun::algorithm::guess(filtered_words);
+    render(best_word, word_count, args.count).expect("Failed to render CLI");
+}
+
+fn render(word: &str, word_count: usize, count: bool) -> Result<()> {
     let stdout = io::stdout();
     let handle = stdout.lock();
     let mut handle = io::BufWriter::new(handle);
-    write!(handle, "{}", best_word)?;
-    if args.count {
+    write!(handle, "{}", word)?;
+    if count {
         write!(handle, " ({})", word_count)?;
     }
     writeln!(handle)?;

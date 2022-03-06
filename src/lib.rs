@@ -1,4 +1,4 @@
-pub mod algorithms;
+pub mod algorithm;
 pub mod dictionary;
 
 use std::collections::HashMap;
@@ -6,18 +6,6 @@ use std::collections::HashMap;
 pub struct Guess {
     pub word: String,
     pub mask: String,
-}
-
-pub trait Guesser {
-    fn guess(&self, words: Vec<&'static str>) -> &'static str;
-}
-
-pub struct Wordle;
-
-impl Wordle {
-    pub fn play<G: Guesser>(filtered_words: Vec<&'static str>, guesser: G) -> &'static str {
-        guesser.guess(filtered_words)
-    }
 }
 
 pub fn get_guesses(state: &str) -> Vec<Guess> {
