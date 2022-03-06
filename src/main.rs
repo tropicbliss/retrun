@@ -39,9 +39,9 @@ fn main() {
 }
 
 fn play(state: &str, wordlist: &Path, count: bool) {
-    let guess_units = wsol::get_guesses(state);
-    let words = wsol::get_words(wordlist);
-    let char_scores = wsol::CharScore::new(&words);
-    let filtered_words = wsol::filter_words(words, guess_units);
-    wsol::render(filtered_words, &char_scores, count).expect("Failed to render CLI");
+    let guess_units = retrun::get_guesses(state);
+    let words = retrun::get_words(wordlist);
+    let char_scores = retrun::CharScore::new(&words);
+    let filtered_words = retrun::filter_words(words, guess_units);
+    retrun::render(filtered_words, &char_scores, count).expect("Failed to render CLI");
 }
