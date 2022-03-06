@@ -32,13 +32,16 @@ impl Correctness {
 }
 
 impl Guesser for NormalMode {
-    fn guess(&self, words: Vec<&'static str>) -> &'static str {
+    fn guess(&self, mut words: Vec<&'static str>) -> &'static str {
         if words.len() == 1 {
             return words[0];
         }
+        words.sort_unstable_by_key(|word| std::cmp::Reverse(dictionary::WORDS[word]));
         let mut patterns: Vec<_> = Correctness::patterns().collect();
         let remaining_count: usize = words.iter().map(|word| dictionary::WORDS[word]).sum();
         let mut best: Option<Candidate> = None;
+        let mut i = 0;
+        let stop = (words.len() / 3).max(20);
         for word in &words {
             let count = dictionary::WORDS[word];
             let mut sum = 0.0;
@@ -76,6 +79,10 @@ impl Guesser for NormalMode {
                 }
             } else {
                 best = Some(Candidate { word, goodness });
+            }
+            i += 1;
+            if i >= stop {
+                break;
             }
         }
         best.expect("Unable to find any words").word
