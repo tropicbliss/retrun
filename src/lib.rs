@@ -88,6 +88,9 @@ pub fn filter_words(history: Vec<Guess>) -> Vec<&'static str> {
             result
         })
         .collect();
+    if rules.is_empty() {
+        return vec!["tares"];
+    }
     dictionary::WORDS
         .into_iter()
         .map(|entry| entry.0)
