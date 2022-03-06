@@ -51,7 +51,10 @@ where
     let guess_units = retrun::get_guesses(&args.state);
     let filtered_words = retrun::filter_words(guess_units);
     let guesser = (mk)();
-    let word_count = filtered_words.len();
+    let mut word_count = filtered_words.len();
+    if word_count == 0 && !args.hard_mode {
+        word_count = 1;
+    }
     let best_word = retrun::Wordle::play(filtered_words, guesser);
     let stdout = io::stdout();
     let handle = stdout.lock();
