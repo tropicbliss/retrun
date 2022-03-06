@@ -36,12 +36,13 @@ impl Guesser for NormalMode {
         if words.len() == 1 {
             return words[0];
         }
+        let mut patterns: Vec<_> = Correctness::patterns().collect();
         let remaining_count: usize = words.iter().map(|word| dictionary::WORDS[word]).sum();
         let mut best: Option<Candidate> = None;
         for word in &words {
             let count = dictionary::WORDS[word];
             let mut sum = 0.0;
-            for pattern in Correctness::patterns() {
+            let check_pattern = |pattern: &[Correctness; 5]| {
                 let mut in_pattern_total = 0;
                 for candidate in &words {
                     let g: Vec<_> = word
@@ -59,12 +60,14 @@ impl Guesser for NormalMode {
                     }
                 }
                 if in_pattern_total == 0 {
-                    continue;
+                    return false;
                 }
                 // TODO: apply sigmoid
                 let p_of_this_pattern = in_pattern_total as f64 / remaining_count as f64;
                 sum += p_of_this_pattern * p_of_this_pattern.log2();
-            }
+                return true;
+            };
+            patterns.retain(check_pattern);
             let p_word = count as f64 / remaining_count as f64;
             let goodness = p_word * -sum;
             if let Some(c) = &best {
