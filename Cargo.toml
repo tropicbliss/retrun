@@ -6,10 +6,8 @@ authors = ["tropicbliss <tropicbliss@protonmail.com>"]
 license = "MIT"
 description = "A simple and fast Wordle word finder"
 
-[dependencies]
-clap = { version = "3.0.14", features = ["derive"] }
-
 [profile.release]
-lto = "fat"
-codegen-units = 1
-strip = "debuginfo"
+debug = true
+
+[dependencies]
+clap = { version = "3", features = ["derive"] }
