@@ -97,7 +97,7 @@ pub fn filter_words(history: Vec<Guess>) -> Vec<&'static str> {
                 }
                 Rule::Misplaced(letter, idx) => {
                     word.as_bytes().get(*idx).expect("Unexpected word length") != letter
-                        && !word.bytes().any(|l| letter == &l)
+                        && word.bytes().any(|l| letter == &l)
                 }
             })
         })
