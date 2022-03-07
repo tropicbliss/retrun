@@ -9,9 +9,6 @@ pub struct Guess {
 }
 
 pub fn get_guesses(state: &str) -> Vec<Guess> {
-    if !state.is_ascii() {
-        panic!("Invalid characters in state");
-    }
     let guesses = state.split(',');
     guesses
         .into_iter()
