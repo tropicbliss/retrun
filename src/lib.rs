@@ -40,7 +40,7 @@ enum Rule {
     Correct(u8, usize),
 }
 
-pub fn filter_words(history: Vec<Guess>) -> Vec<&'static str> {
+pub fn filter_words(history: Vec<Guess>) -> (usize, Vec<&'static str>) {
     let mut possible_lengths: HashMap<u8, usize> = HashMap::new();
     let rules: Vec<_> = history
         .into_iter()
@@ -80,9 +80,9 @@ pub fn filter_words(history: Vec<Guess>) -> Vec<&'static str> {
         })
         .collect();
     if rules.is_empty() {
-        return vec!["tares"];
+        return (dictionary::WORDS.len(), vec!["tares"]);
     }
-    dictionary::WORDS
+    let filtered_words: Vec<_> = dictionary::WORDS
         .into_iter()
         .map(|entry| entry.0)
         .filter(|word| {
@@ -102,5 +102,6 @@ pub fn filter_words(history: Vec<Guess>) -> Vec<&'static str> {
             })
         })
         .copied()
-        .collect()
+        .collect();
+    (filtered_words.len(), filtered_words)
 }

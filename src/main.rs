@@ -32,10 +32,9 @@ pub struct Args {
 fn main() {
     let args = Args::parse();
     let guess_units = retrun::get_guesses(&args.state);
-    let filtered_words = retrun::filter_words(guess_units);
-    let word_count = filtered_words.len();
-    let best_word = retrun::algorithm::guess(filtered_words);
-    render(best_word, word_count, args.count).expect("Failed to render CLI");
+    let filtered_data = retrun::filter_words(guess_units);
+    let best_word = retrun::algorithm::guess(filtered_data.1);
+    render(best_word, filtered_data.0, args.count).expect("Failed to render CLI");
 }
 
 fn render(word: &str, word_count: usize, count: bool) -> Result<()> {
