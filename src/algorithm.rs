@@ -102,7 +102,8 @@ pub fn guess(mut words: Vec<&'static str>) -> &'static str {
         };
         patterns.retain(check_pattern);
         let p_word = count as f64 / remaining_count as f64;
-        let goodness = p_word * -sum;
+        let entropy = -sum;
+        let goodness = p_word * entropy;
         if let Some(c) = &best {
             if goodness > c.goodness {
                 best = Some(Candidate { word, goodness });
