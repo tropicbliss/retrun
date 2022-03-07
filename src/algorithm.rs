@@ -58,7 +58,7 @@ fn matches(word: &'static str, ruleset: Vec<Rule>) -> bool {
         }
         Rule::Misplaced(letter, idx) => {
             word.as_bytes().get(*idx).expect("Unexpected word length") != letter
-                && !word.bytes().any(|l| letter == &l)
+                && word.bytes().any(|l| letter == &l)
         }
     })
 }
