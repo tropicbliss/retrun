@@ -29,7 +29,7 @@ impl Correctness {
     }
 }
 
-fn matches(word: &'static str, ruleset: Vec<Rule>) -> bool {
+fn matches(word: &'static str, ruleset: &[Rule]) -> bool {
     let mut possible_lengths: HashMap<u8, usize> = HashMap::new();
     ruleset
         .iter()
@@ -78,18 +78,18 @@ pub fn guess(mut words: Vec<&'static str>) -> &'static str {
         let mut sum = 0.0;
         let check_pattern = |pattern: &[Correctness; 5]| {
             let mut in_pattern_total = 0;
+            let g: Vec<_> = word
+                .bytes()
+                .zip(pattern.iter())
+                .enumerate()
+                .map(|(idx, (letter, rule))| match rule {
+                    Correctness::Correct => Rule::Correct(letter, idx),
+                    Correctness::Misplaced => Rule::Misplaced(letter, idx),
+                    Correctness::Wrong => Rule::Wrong(letter),
+                })
+                .collect();
             for candidate in &words {
-                let g: Vec<_> = word
-                    .bytes()
-                    .zip(pattern.iter())
-                    .enumerate()
-                    .map(|(idx, (letter, rule))| match rule {
-                        Correctness::Correct => Rule::Correct(letter, idx),
-                        Correctness::Misplaced => Rule::Misplaced(letter, idx),
-                        Correctness::Wrong => Rule::Wrong(letter),
-                    })
-                    .collect();
-                if matches(candidate, g) {
+                if matches(candidate, &g) {
                     in_pattern_total += dictionary::WORDS[candidate];
                 }
             }
