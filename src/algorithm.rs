@@ -6,7 +6,7 @@ pub struct Candidate {
     goodness: f64,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Clone)]
 pub enum Correctness {
     /// Green
     Correct,
