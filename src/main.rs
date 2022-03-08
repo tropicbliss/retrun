@@ -15,7 +15,6 @@ use std::io::{self, Result, Write};
 ///
 /// Green: 3
 ///
-///
 /// Example:
 ///
 /// -----:00000,arose:31112,amend:31211
