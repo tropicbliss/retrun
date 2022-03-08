@@ -6,18 +6,12 @@ use std::io::{self, Result, Write};
 #[derive(Parser)]
 #[clap(author, version, about)]
 /// Feedback character legend:
-///
 /// Initial: 0
-///
 /// Gray: 1
-///
 /// Yellow: 2
-///
 /// Green: 3
 ///
-///
 /// Example:
-///
 /// -----:00000,arose:31112,amend:31211
 pub struct Args {
     /// Play state
