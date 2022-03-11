@@ -24,11 +24,11 @@ pub fn guess(history: &[Guess]) -> (&'static str, usize) {
     let score = history.len() as f64 + 1.0;
     let sum: f64 = dictionary::WORDS
         .into_iter()
-        .map(|entry| *entry.1 as f64)
+        .map(|(_, count)| *count as f64)
         .sum();
     let mut remaining: Vec<_> = dictionary::WORDS
         .into_iter()
-        .map(|entry| entry.0)
+        .map(|(word, _)| word)
         .filter(|word| history.iter().all(|guess| guess.matches(word)))
         .map(|word| {
             (
@@ -38,7 +38,7 @@ pub fn guess(history: &[Guess]) -> (&'static str, usize) {
         })
         .collect();
     remaining.sort_unstable_by_key(|(word, _)| std::cmp::Reverse(dictionary::WORDS.get(word)));
-    let remaining_p: f64 = remaining.iter().map(|entry| entry.1).sum();
+    let remaining_p: f64 = remaining.iter().map(|(_, p)| p).sum();
     let remaining_entropy = -remaining
         .iter()
         .map(|(_, p)| {
@@ -58,8 +58,8 @@ pub fn guess(history: &[Guess]) -> (&'static str, usize) {
         let sum: f64 = totals
             .into_iter()
             .filter(|t| *t != 0.0)
-            .map(|t| {
-                let p_of_this_pattern = t / remaining_p;
+            .map(|p| {
+                let p_of_this_pattern = p / remaining_p;
                 p_of_this_pattern * p_of_this_pattern.log2()
             })
             .sum();
@@ -68,7 +68,7 @@ pub fn guess(history: &[Guess]) -> (&'static str, usize) {
         let e_score =
             p_word * score + (1.0 - p_word) * (score + est_steps_left(remaining_entropy - e_info));
         if let Some(c) = &best {
-            if e_score > c.e_score {
+            if e_score < c.e_score {
                 best = Some(Candidate { word, e_score });
             }
         } else {
