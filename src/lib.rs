@@ -56,10 +56,7 @@ pub fn get_guesses(state: &str) -> Vec<Guess> {
                     '3' => Correctness::Correct,
                     _ => unimplemented!("Invalid mask character"),
                 };
-                unsafe {
-                    let elem = mask.get_unchecked_mut(idx);
-                    *elem = correctness;
-                }
+                mask[idx] = correctness;
             }
             Some(Guess { word, mask })
         })
