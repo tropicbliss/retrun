@@ -29,7 +29,6 @@ pub fn guess(history: &[Guess]) -> (&'static str, usize) {
             let idx = enumerate_mask(&Correctness::compute(candidate, word));
             totals[idx] += count;
         }
-        assert_eq!(totals.iter().sum::<usize>(), remaining_count, "{}", word);
         let sum: f64 = totals
             .into_iter()
             .filter(|t| *t != 0)

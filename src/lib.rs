@@ -8,8 +8,6 @@ pub struct Guess {
 
 impl Guess {
     pub fn matches(&self, word: &str) -> bool {
-        assert_eq!(word.len(), 5);
-        assert_eq!(self.word.len(), 5);
         let mut used = [false; 5];
         for (i, (a, g)) in word.bytes().zip(self.word.bytes()).enumerate() {
             if a == g {
@@ -103,8 +101,6 @@ impl Correctness {
     }
 
     fn compute(answer: &str, guess: &str) -> [Self; 5] {
-        assert_eq!(answer.len(), 5);
-        assert_eq!(guess.len(), 5);
         let mut c = [Correctness::Wrong; 5];
         let answer_bytes = answer.as_bytes();
         let guess_bytes = guess.as_bytes();
