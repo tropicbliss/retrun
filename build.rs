@@ -1,6 +1,5 @@
 use std::env;
-use std::fs::read_to_string;
-use std::fs::File;
+use std::fs::{read_to_string, File};
 use std::io::{BufWriter, Write};
 use std::path::Path;
 
