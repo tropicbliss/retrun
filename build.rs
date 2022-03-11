@@ -4,10 +4,11 @@ use std::fs::File;
 use std::io::{BufWriter, Write};
 use std::path::Path;
 
-const FILE_NAME: &str = "dictionary.txt";
+const DICTIONARY_FILE: &str = "dictionary.txt";
 
 fn main() {
-    let file = read_to_string(FILE_NAME).expect(&format!("Unable to open {}", FILE_NAME));
+    let file =
+        read_to_string(DICTIONARY_FILE).expect(&format!("Unable to open {}", DICTIONARY_FILE));
     let word_data: Vec<_> = file
         .lines()
         .map(|line| {
