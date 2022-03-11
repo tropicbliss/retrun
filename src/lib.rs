@@ -1,104 +1,136 @@
 pub mod algorithm;
 pub mod dictionary;
 
-use std::collections::HashMap;
-
 pub struct Guess {
     pub word: String,
-    pub mask: String,
+    pub mask: [Correctness; 5],
+}
+
+impl Guess {
+    pub fn matches(&self, word: &str) -> bool {
+        assert_eq!(word.len(), 5);
+        assert_eq!(self.word.len(), 5);
+        let mut used = [false; 5];
+        for (i, (a, g)) in word.bytes().zip(self.word.bytes()).enumerate() {
+            if a == g {
+                if self.mask[i] != Correctness::Correct {
+                    return false;
+                }
+                used[i] = true;
+            } else if self.mask[i] == Correctness::Correct {
+                return false;
+            }
+        }
+        for (g, e) in self.word.bytes().zip(self.mask.iter()) {
+            if *e == Correctness::Correct {
+                continue;
+            }
+            if Correctness::is_misplaced(g, word, &mut used) != (*e == Correctness::Misplaced) {
+                return false;
+            }
+        }
+        true
+    }
 }
 
 pub fn get_guesses(state: &str) -> Vec<Guess> {
     let guesses = state.split(',');
     guesses
         .into_iter()
-        .map(|guess| {
+        .filter_map(|guess| {
+            if guess == "-----:00000" {
+                return None;
+            }
             let mut guess_data = guess.split(':');
-            Guess {
+            let mask = guess_data
+                .next()
+                .expect("Mask segment not found")
+                .to_string();
+            let mask: Vec<_> = mask
+                .chars()
+                .map(|letter| match letter {
+                    '1' => Correctness::Wrong,
+                    '2' => Correctness::Misplaced,
+                    '3' => Correctness::Correct,
+                    _ => unimplemented!("Invalid mask character"),
+                })
+                .collect();
+            Some(Guess {
                 word: guess_data
                     .next()
                     .expect("Word segment not found")
                     .to_string(),
-                mask: guess_data
-                    .next()
-                    .expect("Mask segment not found")
-                    .to_string(),
-            }
+                mask: [mask[0], mask[1], mask[2], mask[3], mask[4]],
+            })
         })
         .collect()
 }
 
-enum Rule {
-    /// Grey
-    Wrong(u8),
-    /// Yellow
-    Misplaced(u8, usize),
-    /// Green
-    Correct(u8, usize),
+pub fn enumerate_mask(c: &[Correctness; 5]) -> usize {
+    c.iter().fold(0, |acc, c| {
+        acc * 3
+            + match c {
+                Correctness::Correct => 0,
+                Correctness::Misplaced => 1,
+                Correctness::Wrong => 2,
+            }
+    })
 }
 
-pub fn filter_words(history: Vec<Guess>) -> (usize, Vec<&'static str>) {
-    let mut possible_lengths: HashMap<u8, usize> = HashMap::new();
-    let rules: Vec<_> = history
-        .into_iter()
-        .flat_map(|unit| {
-            let result: Vec<_> = unit
-                .word
-                .bytes()
-                .zip(unit.mask.bytes())
-                .enumerate()
-                .filter_map(|(idx, data)| match data.1 {
-                    b'1' => Some(Rule::Wrong(data.0)),
-                    b'2' => Some(Rule::Misplaced(data.0, idx)),
-                    b'3' => Some(Rule::Correct(data.0, idx)),
-                    b'0' => None,
-                    _ => unimplemented!("Unexpected feedback segment character"),
-                })
-                .collect();
-            result
-                .iter()
-                .filter_map(|rule| match rule {
-                    Rule::Wrong(letter) => Some(letter),
-                    _ => None,
-                })
-                .for_each(|letter| {
-                    let number_of_occurences = result
-                        .iter()
-                        .filter_map(|rule| match rule {
-                            Rule::Misplaced(l, _) | Rule::Correct(l, _) if l == letter => {
-                                Some(letter)
-                            }
-                            _ => None,
-                        })
-                        .count();
-                    possible_lengths.insert(*letter, number_of_occurences);
-                });
-            result
-        })
-        .collect();
-    if rules.is_empty() {
-        return (dictionary::WORDS.len(), vec!["tares"]);
+pub const MAX_MASK_ENUM: usize = 3 * 3 * 3 * 3 * 3;
+
+#[derive(Clone, PartialEq, Copy)]
+pub enum Correctness {
+    /// Green
+    Correct,
+    /// Yellow
+    Misplaced,
+    /// Grey
+    Wrong,
+}
+
+impl Correctness {
+    pub fn patterns() -> impl Iterator<Item = [Self; 5]> {
+        itertools::iproduct!(
+            [Self::Correct, Self::Misplaced, Self::Wrong],
+            [Self::Correct, Self::Misplaced, Self::Wrong],
+            [Self::Correct, Self::Misplaced, Self::Wrong],
+            [Self::Correct, Self::Misplaced, Self::Wrong],
+            [Self::Correct, Self::Misplaced, Self::Wrong]
+        )
+        .map(|(a, b, c, d, e)| [a, b, c, d, e])
     }
-    let filtered_words: Vec<_> = dictionary::WORDS
-        .into_iter()
-        .map(|entry| entry.0)
-        .filter(|word| {
-            rules.iter().all(|rule| match rule {
-                Rule::Wrong(letter) => {
-                    !word.bytes().any(|l| letter == &l)
-                        || &word.bytes().filter(|l| l == letter).count()
-                            == possible_lengths.get(letter).unwrap()
-                }
-                Rule::Correct(letter, idx) => {
-                    word.as_bytes().get(*idx).expect("Unexpected word length") == letter
-                }
-                Rule::Misplaced(letter, idx) => {
-                    word.as_bytes().get(*idx).expect("Unexpected word length") != letter
-                        && word.bytes().any(|l| letter == &l)
-                }
-            })
+
+    fn compute(answer: &str, guess: &str) -> [Self; 5] {
+        assert_eq!(answer.len(), 5);
+        assert_eq!(guess.len(), 5);
+        let mut c = [Correctness::Wrong; 5];
+        let answer_bytes = answer.as_bytes();
+        let guess_bytes = guess.as_bytes();
+        let mut misplaced = [0u8; (b'z' - b'a' + 1) as usize];
+        for ((&answer, &guess), c) in answer_bytes.iter().zip(guess_bytes).zip(c.iter_mut()) {
+            if answer == guess {
+                *c = Correctness::Correct
+            } else {
+                misplaced[(answer - b'a') as usize] += 1;
+            }
+        }
+        for (&guess, c) in guess_bytes.iter().zip(c.iter_mut()) {
+            if *c == Correctness::Wrong && misplaced[(guess - b'a') as usize] > 0 {
+                *c = Correctness::Misplaced;
+                misplaced[(guess - b'a') as usize] -= 1;
+            }
+        }
+        c
+    }
+
+    fn is_misplaced(letter: u8, answer: &str, used: &mut [bool; 5]) -> bool {
+        answer.bytes().enumerate().any(|(i, a)| {
+            if a == letter && !used[i] {
+                used[i] = true;
+                return true;
+            }
+            false
         })
-        .copied()
-        .collect();
-    (filtered_words.len(), filtered_words)
+    }
 }

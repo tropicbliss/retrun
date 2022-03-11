@@ -1,109 +1,43 @@
-use crate::{dictionary, Rule};
-use std::collections::HashMap;
+use crate::{dictionary, enumerate_mask, Correctness, Guess, MAX_MASK_ENUM};
 
 pub struct Candidate {
     word: &'static str,
     goodness: f64,
 }
 
-#[derive(Clone)]
-pub enum Correctness {
-    /// Green
-    Correct,
-    /// Yellow
-    Misplaced,
-    /// Grey
-    Wrong,
-}
-
-impl Correctness {
-    pub fn patterns() -> impl Iterator<Item = [Self; 5]> {
-        itertools::iproduct!(
-            [Self::Correct, Self::Misplaced, Self::Wrong],
-            [Self::Correct, Self::Misplaced, Self::Wrong],
-            [Self::Correct, Self::Misplaced, Self::Wrong],
-            [Self::Correct, Self::Misplaced, Self::Wrong],
-            [Self::Correct, Self::Misplaced, Self::Wrong]
-        )
-        .map(|(a, b, c, d, e)| [a, b, c, d, e])
+pub fn guess(history: &[Guess]) -> (&'static str, usize) {
+    if history.is_empty() {
+        return ("tares", dictionary::WORDS.len());
     }
-}
-
-fn matches(word: &'static str, ruleset: &[Rule]) -> bool {
-    let mut possible_lengths: HashMap<u8, usize> = HashMap::new();
-    ruleset
-        .iter()
-        .filter_map(|rule| match rule {
-            Rule::Wrong(letter) => Some(letter),
-            _ => None,
-        })
-        .for_each(|letter| {
-            let number_of_occurences = ruleset
-                .iter()
-                .filter_map(|rule| match rule {
-                    Rule::Misplaced(l, _) | Rule::Correct(l, _) if l == letter => Some(letter),
-                    _ => None,
-                })
-                .count();
-            possible_lengths.insert(*letter, number_of_occurences);
-        });
-    ruleset.iter().all(|rule| match rule {
-        Rule::Wrong(letter) => {
-            !word.bytes().any(|l| letter == &l)
-                || &word.bytes().filter(|l| l == letter).count()
-                    == possible_lengths.get(letter).unwrap()
-        }
-        Rule::Correct(letter, idx) => {
-            word.as_bytes().get(*idx).expect("Unexpected word length") == letter
-        }
-        Rule::Misplaced(letter, idx) => {
-            word.as_bytes().get(*idx).expect("Unexpected word length") != letter
-                && word.bytes().any(|l| letter == &l)
-        }
-    })
-}
-
-pub fn guess(mut words: Vec<&'static str>) -> &'static str {
-    if words.len() == 1 {
-        return words[0];
-    }
-    words.sort_unstable_by_key(|word| std::cmp::Reverse(dictionary::WORDS.get(word)));
-    let mut patterns: Vec<_> = Correctness::patterns().collect();
-    let remaining_count: usize = words
+    let mut remaining: Vec<_> = dictionary::WORDS
+        .into_iter()
+        .map(|entry| entry.0)
+        .filter(|word| history.iter().all(|guess| guess.matches(word)))
+        .collect();
+    remaining.sort_unstable_by_key(|word| std::cmp::Reverse(dictionary::WORDS.get(word)));
+    let remaining_count: usize = remaining
         .iter()
         .map(|word| dictionary::WORDS.get(word).unwrap())
         .sum();
     let mut best: Option<Candidate> = None;
     let mut i = 0;
-    let stop = (words.len() / 3).max(20);
-    for word in &words {
+    let stop = (remaining.len() / 3).max(20);
+    for word in &remaining {
         let count = dictionary::WORDS.get(word).unwrap();
-        let mut sum = 0.0;
-        let check_pattern = |pattern: &[Correctness; 5]| {
-            let mut in_pattern_total = 0;
-            let g: Vec<_> = word
-                .bytes()
-                .zip(pattern.iter())
-                .enumerate()
-                .map(|(idx, (letter, rule))| match rule {
-                    Correctness::Correct => Rule::Correct(letter, idx),
-                    Correctness::Misplaced => Rule::Misplaced(letter, idx),
-                    Correctness::Wrong => Rule::Wrong(letter),
-                })
-                .collect();
-            for candidate in &words {
-                if matches(candidate, &g) {
-                    in_pattern_total += dictionary::WORDS.get(candidate).unwrap();
-                }
-            }
-            if in_pattern_total == 0 {
-                return false;
-            }
-            let p_of_this_pattern = in_pattern_total as f64 / remaining_count as f64;
-            sum += p_of_this_pattern * p_of_this_pattern.log2();
-            true
-        };
-        patterns.retain(check_pattern);
+        let mut totals = [0usize; MAX_MASK_ENUM];
+        for candidate in &remaining {
+            let idx = enumerate_mask(&Correctness::compute(candidate, word));
+            totals[idx] += count;
+        }
+        assert_eq!(totals.iter().sum::<usize>(), remaining_count, "{}", word);
+        let sum: f64 = totals
+            .into_iter()
+            .filter(|t| *t != 0)
+            .map(|t| {
+                let p_of_this_pattern = t as f64 / remaining_count as f64;
+                p_of_this_pattern * p_of_this_pattern.log2()
+            })
+            .sum();
         let p_word = *count as f64 / remaining_count as f64;
         let entropy = -sum;
         let goodness = p_word * entropy;
@@ -119,5 +53,8 @@ pub fn guess(mut words: Vec<&'static str>) -> &'static str {
             break;
         }
     }
-    best.expect("Unable to find any words").word
+    (
+        best.expect("Unable to find any words").word,
+        remaining.len(),
+    )
 }
