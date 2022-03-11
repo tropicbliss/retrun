@@ -4,13 +4,20 @@ use std::fs::File;
 use std::io::{BufWriter, Write};
 use std::path::Path;
 
+const FILE_NAME: &str = "dictionary.txt";
+
 fn main() {
-    let file = read_to_string("dictionary.txt").expect("Unable to open dictionary.txt");
+    let file = read_to_string(FILE_NAME).expect(&format!("Unable to open {}", FILE_NAME));
     let word_data: Vec<_> = file
         .lines()
         .map(|line| {
-            line.split_once(' ')
-                .expect("every line is word + space + frequency")
+            let (word, count) = line
+                .split_once(' ')
+                .expect("every line is word + space + frequency");
+            if count.parse::<usize>().is_err() {
+                panic!("every count is a number");
+            }
+            (word, count)
         })
         .collect();
     let path = Path::new(&env::var("OUT_DIR").unwrap()).join("dictionary.rs");
