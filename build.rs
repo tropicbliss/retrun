@@ -15,9 +15,7 @@ fn main() {
             let (word, count) = line
                 .split_once(' ')
                 .expect("every line is word + space + frequency");
-            if count.parse::<usize>().is_err() {
-                panic!("every count is a number");
-            }
+            count.parse::<usize>().expect("every count is a number");
             (word, count)
         })
         .collect();
