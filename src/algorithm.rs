@@ -1,4 +1,6 @@
-use crate::{dictionary, enumerate_mask, Correctness, Guess, MAX_MASK_ENUM};
+use crate::{enumerate_mask, Correctness, Guess, MAX_MASK_ENUM};
+
+include!(concat!(env!("OUT_DIR"), "/dictionary.rs"));
 
 pub struct Candidate {
     word: &'static str,
@@ -19,25 +21,17 @@ fn est_steps_left(entropy: f64) -> f64 {
 
 pub fn guess(history: &[Guess]) -> (&'static str, usize) {
     if history.is_empty() {
-        return ("tares", dictionary::WORDS.len());
+        return ("tares", WORDS.len());
     }
     let score = history.len() as f64 + 1.0;
-    let sum: f64 = dictionary::WORDS
-        .into_iter()
-        .map(|(_, count)| *count as f64)
-        .sum();
-    let mut remaining: Vec<_> = dictionary::WORDS
+    let sum: f64 = WORDS.into_iter().map(|(_, count)| *count as f64).sum();
+    let mut remaining: Vec<_> = WORDS
         .into_iter()
         .map(|(word, _)| word)
         .filter(|word| history.iter().all(|guess| guess.matches(word)))
-        .map(|word| {
-            (
-                word,
-                sigmoid(*dictionary::WORDS.get(word).unwrap() as f64 / sum),
-            )
-        })
+        .map(|word| (word, sigmoid(*WORDS.get(word).unwrap() as f64 / sum)))
         .collect();
-    remaining.sort_unstable_by_key(|(word, _)| std::cmp::Reverse(dictionary::WORDS.get(word)));
+    remaining.sort_unstable_by_key(|(word, _)| std::cmp::Reverse(WORDS.get(word)));
     let remaining_p: f64 = remaining.iter().map(|(_, p)| p).sum();
     let remaining_entropy = -remaining
         .iter()

@@ -10,3 +10,6 @@ description = "A simple and fast Wordle word finder"
 clap = { version = "3", features = ["derive"] }
 itertools = "0.10"
 phf = { version = "0.10.1", features = ["macros"] }
+
+[build-dependencies]
+phf_codegen = "0.10.0"

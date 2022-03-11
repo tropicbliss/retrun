@@ -1,5 +1,4 @@
 pub mod algorithm;
-pub mod dictionary;
 
 pub struct Guess {
     pub word: String,
