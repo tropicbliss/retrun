@@ -44,23 +44,21 @@ pub fn get_guesses(state: &str) -> Vec<Guess> {
                 .next()
                 .expect("Word segment not found")
                 .to_string();
-            let mask = guess_data
+            let raw_mask = guess_data
                 .next()
                 .expect("Mask segment not found")
                 .to_string();
-            let mask: Vec<_> = mask
-                .chars()
-                .map(|letter| match letter {
+            let mut mask = [Correctness::Correct; 5];
+            for (idx, l) in raw_mask.chars().enumerate() {
+                let correctness = match l {
                     '1' => Correctness::Wrong,
                     '2' => Correctness::Misplaced,
                     '3' => Correctness::Correct,
                     _ => unimplemented!("Invalid mask character"),
-                })
-                .collect();
-            Some(Guess {
-                word,
-                mask: [mask[0], mask[1], mask[2], mask[3], mask[4]],
-            })
+                };
+                mask[idx] = correctness;
+            }
+            Some(Guess { word, mask })
         })
         .collect()
 }
