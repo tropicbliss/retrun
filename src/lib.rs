@@ -42,6 +42,10 @@ pub fn get_guesses(state: &str) -> Vec<Guess> {
                 return None;
             }
             let mut guess_data = guess.split(':');
+            let word = guess_data
+                .next()
+                .expect("Word segment not found")
+                .to_string();
             let mask = guess_data
                 .next()
                 .expect("Mask segment not found")
@@ -56,10 +60,7 @@ pub fn get_guesses(state: &str) -> Vec<Guess> {
                 })
                 .collect();
             Some(Guess {
-                word: guess_data
-                    .next()
-                    .expect("Word segment not found")
-                    .to_string(),
+                word,
                 mask: [mask[0], mask[1], mask[2], mask[3], mask[4]],
             })
         })
