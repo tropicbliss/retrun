@@ -16,14 +16,14 @@ fn sigmoid(p: f64) -> f64 {
 }
 
 fn est_steps_left(entropy: f64) -> f64 {
-    (entropy * 3.264 + 4.834).ln()
+    (entropy * 3.870 + 3.679).ln()
 }
 
 pub fn guess(history: &[Guess]) -> (&'static str, usize) {
     if history.is_empty() {
         return ("tares", WORDS.len());
     }
-    let score = history.len() as f64 + 1.0;
+    let score = history.len() as f64;
     let sum: f64 = WORDS.into_iter().map(|(_, count)| *count as f64).sum();
     let mut remaining: Vec<_> = WORDS
         .into_iter()
@@ -59,8 +59,8 @@ pub fn guess(history: &[Guess]) -> (&'static str, usize) {
             .sum();
         let p_word = *count / remaining_p;
         let e_info = -sum;
-        let e_score =
-            p_word * score + (1.0 - p_word) * (score + est_steps_left(remaining_entropy - e_info));
+        let e_score = p_word * (score + 1.0)
+            + (1.0 - p_word) * (score + est_steps_left(remaining_entropy - e_info));
         if let Some(c) = &best {
             if e_score < c.e_score {
                 best = Some(Candidate { word, e_score });
