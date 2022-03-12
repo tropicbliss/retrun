@@ -44,5 +44,6 @@ fn render(word: &str, word_count: usize, count: bool) -> Result<()> {
         write!(handle, " ({})", word_count)?;
     }
     writeln!(handle)?;
+    handle.flush()?;
     Ok(())
 }
