@@ -38,7 +38,7 @@ fn main() {
 fn render(word: &str, word_count: usize, count: bool) -> Result<()> {
     let stdout = io::stdout();
     let handle = stdout.lock();
-    let mut handle = io::BufWriter::new(handle);
+    let mut handle = io::BufWriter::with_capacity(13, handle);
     write!(handle, "{}", word)?;
     if count {
         write!(handle, " ({})", word_count)?;
