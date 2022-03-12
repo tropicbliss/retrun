@@ -19,7 +19,7 @@ fn est_steps_left(entropy: f64) -> f64 {
     (entropy * 3.870 + 3.679).ln()
 }
 
-pub fn guess(history: &[Guess]) -> (&'static str, usize) {
+pub fn guess(history: &[Guess], blocked: Vec<String>) -> (&'static str, usize) {
     if history.is_empty() {
         return ("tares", WORDS.len());
     }
@@ -28,7 +28,11 @@ pub fn guess(history: &[Guess]) -> (&'static str, usize) {
     let mut remaining: Vec<_> = WORDS
         .into_iter()
         .map(|(word, _)| word)
-        .filter(|word| history.iter().all(|guess| guess.matches(word)))
+        .filter(|word| {
+            history
+                .iter()
+                .all(|guess| guess.matches(word) && !blocked.contains(&word.to_string()))
+        })
         .map(|word| (word, sigmoid(*WORDS.get(word).unwrap() as f64 / sum)))
         .collect();
     remaining.sort_unstable_by_key(|(word, _)| std::cmp::Reverse(WORDS.get(word)));

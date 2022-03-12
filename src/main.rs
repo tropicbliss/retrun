@@ -25,12 +25,16 @@ pub struct Args {
     /// Show number of results
     #[clap(short, long)]
     pub count: bool,
+
+    /// Blocked words
+    #[clap(short, long)]
+    pub blocked: Vec<String>,
 }
 
 fn main() {
     let args = Args::parse();
     let history = retrun::get_guesses(&args.state);
-    let filtered_data = retrun::algorithm::guess(&history);
+    let filtered_data = retrun::algorithm::guess(&history, args.blocked);
     render(filtered_data.0, args.count.then(|| filtered_data.1));
 }
 
