@@ -1,7 +1,7 @@
 #![warn(clippy::pedantic)]
 
 use clap::Parser;
-use std::io::{self, Result, Write};
+use std::io::{stdout, Result, Write};
 
 #[derive(Parser)]
 #[clap(author, version, about)]
@@ -32,18 +32,14 @@ fn main() {
     let args = Args::parse();
     let history = retrun::get_guesses(&args.state);
     let filtered_data = retrun::algorithm::guess(&history);
-    render(filtered_data.0, filtered_data.1, args.count).expect("Failed to render CLI");
+    render(filtered_data.0, args.count.then(|| filtered_data.1)).expect("Failed to render CLI");
 }
 
-fn render(word: &str, word_count: usize, count: bool) -> Result<()> {
-    let stdout = io::stdout();
-    let handle = stdout.lock();
-    let mut handle = io::BufWriter::with_capacity(13, handle);
-    write!(handle, "{}", word)?;
-    if count {
-        write!(handle, " ({})", word_count)?;
+fn render(word: &str, word_count: Option<usize>) -> Result<()> {
+    if let Some(word_count) = word_count {
+        writeln!(stdout(), "{} ({})", word, word_count)?;
+    } else {
+        writeln!(stdout(), "{}", word)?;
     }
-    writeln!(handle)?;
-    handle.flush()?;
     Ok(())
 }
