@@ -19,7 +19,7 @@ use clap::Parser;
 /// -----:00000,arose:31112,amend:31211
 struct Args {
     /// Play state
-    #[clap(short, long)]
+    #[clap(global = true)]
     pub state: String,
 
     /// Show number of results
@@ -27,7 +27,7 @@ struct Args {
     pub count: bool,
 
     /// Set blocked words
-    #[clap(short, long)]
+    #[clap(short, long, multiple_occurrences(true))]
     pub blocked: Vec<String>,
 }
 
