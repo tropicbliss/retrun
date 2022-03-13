@@ -16,8 +16,6 @@ The syntax of `state` is based on the syntax [Wordle botfights](https://botfight
 
 ## Building
 
-If you are on another platform, compile the binary yourself to try it out:
-
 ```sh
 git clone https://github.com/tropicbliss/retrun
 cd retrun
