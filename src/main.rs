@@ -6,9 +6,9 @@ use clap::Parser;
 #[clap(author, version, about)]
 /// Feedback character legend:
 ///
-/// Initial: 0
+/// Empty: 0
 ///
-/// Gray: 1
+/// Grey: 1
 ///
 /// Yellow: 2
 ///
