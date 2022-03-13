@@ -34,8 +34,8 @@ struct Args {
 fn main() {
     let args = Args::parse();
     let history = retrun::get_guesses(&args.state);
-    let filtered_data = retrun::algorithm::guess(&history, args.blocked);
-    render(filtered_data.0, args.count.then(|| filtered_data.1));
+    let filtered_data = retrun::algorithm::Algorithm::guess(&history, args.blocked);
+    render(filtered_data.guess, args.count.then(|| filtered_data.count));
 }
 
 fn render(word: &str, word_count: Option<usize>) {
