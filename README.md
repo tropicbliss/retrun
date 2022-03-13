@@ -16,4 +16,16 @@ The syntax of `state` is based on the syntax [Wordle botfights](https://botfight
 
 ## Building
 
+If you are on another platform, compile the binary yourself to try it out:
+
+```sh
+git clone https://github.com/tropicbliss/retrun
+cd retrun
+cargo build --release
+```
+
+Compiling from source requires the latest stable version of Rust. Older Rust versions may be able to compile `retrun`, but they are not guaranteed to keep working.
+
+The binary will be located in `target/release`.
+
 Note: This project uses a build script (`build.rs` in this project's root) to generate a static HashMap at compile time.
