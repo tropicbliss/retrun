@@ -86,17 +86,6 @@ pub enum Correctness {
 }
 
 impl Correctness {
-    pub fn patterns() -> impl Iterator<Item = [Self; 5]> {
-        itertools::iproduct!(
-            [Self::Correct, Self::Misplaced, Self::Wrong],
-            [Self::Correct, Self::Misplaced, Self::Wrong],
-            [Self::Correct, Self::Misplaced, Self::Wrong],
-            [Self::Correct, Self::Misplaced, Self::Wrong],
-            [Self::Correct, Self::Misplaced, Self::Wrong]
-        )
-        .map(|(a, b, c, d, e)| [a, b, c, d, e])
-    }
-
     fn compute(answer: &str, guess: &str) -> [Self; 5] {
         let mut c = [Correctness::Wrong; 5];
         let answer_bytes = answer.as_bytes();

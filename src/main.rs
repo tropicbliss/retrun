@@ -17,7 +17,7 @@ use clap::Parser;
 /// Example:
 ///
 /// -----:00000,arose:31112,amend:31211
-pub struct Args {
+struct Args {
     /// Play state
     #[clap(global = true)]
     pub state: String,
@@ -26,7 +26,7 @@ pub struct Args {
     #[clap(short, long)]
     pub count: bool,
 
-    /// Blocked words
+    /// Set blocked words
     #[clap(short, long)]
     pub blocked: Vec<String>,
 }

@@ -2,7 +2,7 @@ use crate::{enumerate_mask, Correctness, Guess, MAX_MASK_ENUM};
 
 include!(concat!(env!("OUT_DIR"), "/dictionary.rs"));
 
-pub struct Candidate {
+struct Candidate {
     word: &'static str,
     e_score: f64,
 }
