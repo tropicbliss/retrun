@@ -25,7 +25,7 @@ pub fn guess(history: &[Guess], blocked: Vec<String>) -> (&'static str, usize) {
     }
     let score = history.len() as f64;
     let sum: f64 = WORDS.into_iter().map(|(_, count)| *count as f64).sum();
-    let mut remaining: Vec<_> = WORDS
+    let remaining: Vec<_> = WORDS
         .into_iter()
         .map(|(word, _)| word)
         .filter(|word| {
@@ -35,7 +35,6 @@ pub fn guess(history: &[Guess], blocked: Vec<String>) -> (&'static str, usize) {
         })
         .map(|word| (word, sigmoid(*WORDS.get(word).unwrap() as f64 / sum)))
         .collect();
-    remaining.sort_unstable_by_key(|(word, _)| std::cmp::Reverse(WORDS.get(word)));
     let remaining_p: f64 = remaining.iter().map(|(_, p)| p).sum();
     let remaining_entropy = -remaining
         .iter()
