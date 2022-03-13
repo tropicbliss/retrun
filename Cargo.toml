@@ -7,8 +7,7 @@ license = "MIT"
 description = "A simple and fast Wordle word finder"
 
 [dependencies]
-clap = { version = "3", features = ["derive"] }
-itertools = "0.10"
+clap = { version = "3.1.6", features = ["derive"] }
 phf = { version = "0.10.1", features = ["macros"] }
 
 [build-dependencies]
