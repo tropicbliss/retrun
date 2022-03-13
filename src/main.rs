@@ -27,7 +27,7 @@ struct Args {
     pub count: bool,
 
     /// Set blocked words
-    #[clap(short, long, multiple_occurrences(true))]
+    #[clap(short, long)]
     pub blocked: Vec<String>,
 }
 
