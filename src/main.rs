@@ -19,7 +19,7 @@ use clap::Parser;
 /// -----:00000,arose:31112,amend:31211
 struct Args {
     /// Play state
-    #[clap(global = true)]
+    #[clap(short, long)]
     pub state: String,
 
     /// Show number of results
