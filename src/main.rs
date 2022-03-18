@@ -28,7 +28,7 @@ struct Args {
 
     /// Enable hard mode guessing
     #[clap(short, long)]
-    hard_mode: bool,
+    hard: bool,
 
     /// Set blocked words
     #[clap(short, long)]
