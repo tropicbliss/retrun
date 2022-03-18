@@ -26,6 +26,10 @@ struct Args {
     #[clap(short, long)]
     pub count: bool,
 
+    /// Enable easy mode guessing
+    #[clap(short, long)]
+    easy_mode: bool,
+
     /// Set blocked words
     #[clap(short, long)]
     pub blocked: Vec<String>,
@@ -34,7 +38,7 @@ struct Args {
 fn main() {
     let args = Args::parse();
     let history = retrun::get_guesses(&args.state);
-    let filtered_data = retrun::algorithm::Algorithm::guess(&history, args.blocked);
+    let filtered_data = retrun::algorithm::Algorithm::guess(&history, args.blocked, args.easy_mode);
     render(filtered_data.guess, args.count.then(|| filtered_data.count));
 }
 

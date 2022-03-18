@@ -25,7 +25,7 @@ pub struct Algorithm {
 }
 
 impl Algorithm {
-    pub fn guess(history: &[Guess], blocked: Vec<String>) -> Self {
+    pub fn guess(history: &[Guess], blocked: Vec<String>, easy_mode: bool) -> Self {
         if history.is_empty() {
             return Self {
                 guess: "tares",
@@ -44,6 +44,16 @@ impl Algorithm {
             })
             .map(|word| (word, sigmoid(*WORDS.get(word).unwrap() as f64 / sum)))
             .collect();
+        let consider: Vec<_> = if easy_mode {
+            WORDS
+                .into_iter()
+                .map(|(word, _)| word)
+                .filter(|word| !blocked.contains(&word.to_string()))
+                .map(|word| (word, sigmoid(*WORDS.get(word).unwrap() as f64 / sum)))
+                .collect()
+        } else {
+            remaining.clone()
+        };
         let remaining_p: f64 = remaining.iter().map(|(_, p)| p).sum();
         let remaining_entropy = -remaining
             .iter()
@@ -55,9 +65,11 @@ impl Algorithm {
         let mut best: Option<Candidate> = None;
         let mut i = 0;
         let stop = (remaining.len() / 3).max(20);
-        for (word, count) in &remaining {
+        for (word, count) in consider {
             let mut totals = [0.0f64; MAX_MASK_ENUM];
+            let mut in_remaining = false;
             for (candidate, count) in &remaining {
+                in_remaining |= word == *candidate;
                 let idx = enumerate_mask(&Correctness::compute(candidate, word));
                 totals[idx] += count;
             }
@@ -69,7 +81,11 @@ impl Algorithm {
                     p_of_this_pattern * p_of_this_pattern.log2()
                 })
                 .sum();
-            let p_word = *count / remaining_p;
+            let p_word = if in_remaining {
+                count / remaining_p
+            } else {
+                0.0
+            };
             let e_info = -sum;
             let e_score = p_word * (score + 1.0)
                 + (1.0 - p_word) * (score + est_steps_left(remaining_entropy - e_info));
@@ -80,9 +96,11 @@ impl Algorithm {
             } else {
                 best = Some(Candidate { word, e_score });
             }
-            i += 1;
-            if i >= stop {
-                break;
+            if in_remaining {
+                i += 1;
+                if i >= stop {
+                    break;
+                }
             }
         }
         Self {
