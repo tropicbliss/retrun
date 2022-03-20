@@ -45,12 +45,6 @@ impl Algorithm {
             .map(|word| (word, sigmoid(*WORDS.get(word).unwrap() as f64 / sum)))
             .collect();
         let remaining_len = remaining.len();
-        if remaining_len == 1 {
-            return Self {
-                guess: remaining.get(0).unwrap().0,
-                count: remaining_len,
-            };
-        }
         let score = history.len() as f64;
         let consider: Vec<_> = if easy_mode {
             WORDS
