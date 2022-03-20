@@ -64,7 +64,7 @@ impl Algorithm {
             .sum::<f64>();
         let mut best: Option<Candidate> = None;
         let mut i = 0;
-        let stop = (remaining.len() / 3).max(20);
+        let stop = (remaining.len() / 3).max(20).min(remaining.len());
         for (word, count) in consider {
             let mut totals = [0.0f64; MAX_MASK_ENUM];
             let mut in_remaining = false;
