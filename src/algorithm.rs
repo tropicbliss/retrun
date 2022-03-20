@@ -33,7 +33,6 @@ impl Algorithm {
                 count: WORDS.len(),
             };
         }
-        let score = history.len() as f64;
         let sum: f64 = WORDS.into_iter().map(|(_, count)| *count as f64).sum();
         let remaining: Vec<_> = WORDS
             .into_iter()
@@ -45,6 +44,14 @@ impl Algorithm {
             })
             .map(|word| (word, sigmoid(*WORDS.get(word).unwrap() as f64 / sum)))
             .collect();
+        let remaining_len = remaining.len();
+        if remaining_len == 1 {
+            return Self {
+                guess: remaining.get(0).unwrap().0,
+                count: remaining_len,
+            };
+        }
+        let score = history.len() as f64;
         let consider: Vec<_> = if easy_mode {
             WORDS
                 .into_iter()
@@ -65,7 +72,6 @@ impl Algorithm {
             .sum::<f64>();
         let mut best: Option<Candidate> = None;
         let mut i = 0;
-        let remaining_len = remaining.len();
         let stop = (remaining.len() / 3).max(20).min(remaining_len);
         for (word, count) in consider {
             let mut totals = [0.0f64; MAX_MASK_ENUM];
