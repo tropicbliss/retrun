@@ -65,7 +65,8 @@ impl Algorithm {
             .sum::<f64>();
         let mut best: Option<Candidate> = None;
         let mut i = 0;
-        let stop = (remaining.len() / 3).max(20).min(remaining.len());
+        let remaining_len = remaining.len();
+        let stop = (remaining.len() / 3).max(20).min(remaining_len);
         for (word, count) in consider {
             let mut totals = [0.0f64; MAX_MASK_ENUM];
             let mut in_remaining = false;
@@ -106,7 +107,7 @@ impl Algorithm {
         }
         Self {
             guess: best.expect("Unable to find any words").word,
-            count: remaining.len(),
+            count: remaining_len,
         }
     }
 }
