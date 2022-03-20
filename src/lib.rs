@@ -6,6 +6,7 @@ pub struct Guess {
 }
 
 impl Guess {
+    #[must_use]
     pub fn matches(&self, word: &str) -> bool {
         let mut used = [false; 5];
         for (i, (a, g)) in word.bytes().zip(self.word.bytes()).enumerate() {
@@ -30,6 +31,7 @@ impl Guess {
     }
 }
 
+#[must_use]
 pub fn get_guesses(state: &str) -> Vec<Guess> {
     let guesses = state.split(',');
     guesses
@@ -62,6 +64,7 @@ pub fn get_guesses(state: &str) -> Vec<Guess> {
         .collect()
 }
 
+#[must_use]
 pub fn enumerate_mask(c: &[Correctness; 5]) -> usize {
     c.iter().fold(0, |acc, c| {
         acc * 3
@@ -93,7 +96,7 @@ impl Correctness {
         let mut misplaced = [0u8; (b'z' - b'a' + 1) as usize];
         for ((&answer, &guess), c) in answer_bytes.iter().zip(guess_bytes).zip(c.iter_mut()) {
             if answer == guess {
-                *c = Correctness::Correct
+                *c = Correctness::Correct;
             } else {
                 misplaced[(answer - b'a') as usize] += 1;
             }

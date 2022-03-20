@@ -25,7 +25,8 @@ pub struct Algorithm {
 }
 
 impl Algorithm {
-    pub fn guess(history: &[Guess], blocked: Vec<String>, easy_mode: bool) -> Self {
+    #[must_use]
+    pub fn guess(history: &[Guess], blocked: &[String], easy_mode: bool) -> Self {
         if history.is_empty() {
             return Self {
                 guess: "tares",
@@ -40,7 +41,7 @@ impl Algorithm {
             .filter(|word| {
                 history
                     .iter()
-                    .all(|guess| guess.matches(word) && !blocked.contains(&word.to_string()))
+                    .all(|guess| guess.matches(word) && !blocked.contains(&(**word).to_string()))
             })
             .map(|word| (word, sigmoid(*WORDS.get(word).unwrap() as f64 / sum)))
             .collect();
@@ -48,7 +49,7 @@ impl Algorithm {
             WORDS
                 .into_iter()
                 .map(|(word, _)| word)
-                .filter(|word| !blocked.contains(&word.to_string()))
+                .filter(|word| !blocked.contains(&(**word).to_string()))
                 .map(|word| (word, sigmoid(*WORDS.get(word).unwrap() as f64 / sum)))
                 .collect()
         } else {
