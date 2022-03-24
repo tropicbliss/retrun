@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::{enumerate_mask, Correctness, Guess, MAX_MASK_ENUM};
 
 include!(concat!(env!("OUT_DIR"), "/dictionary.rs"));
@@ -44,17 +46,19 @@ impl Algorithm {
             })
             .map(|word| (word, sigmoid(*WORDS.get(word).unwrap() as f64 / sum)))
             .collect();
+        let remaining = Rc::new(remaining);
         let remaining_len = remaining.len();
         let score = history.len() as f64;
-        let consider: Vec<_> = if easy_mode {
-            WORDS
+        let consider = if easy_mode {
+            let result: Vec<_> = WORDS
                 .into_iter()
                 .map(|(word, _)| word)
                 .filter(|word| !blocked.contains(&(**word).to_string()))
                 .map(|word| (word, sigmoid(*WORDS.get(word).unwrap() as f64 / sum)))
-                .collect()
+                .collect();
+            Rc::new(result)
         } else {
-            remaining.clone()
+            Rc::clone(&remaining)
         };
         let remaining_p: f64 = remaining.iter().map(|(_, p)| p).sum();
         let remaining_entropy = -remaining
@@ -67,11 +71,11 @@ impl Algorithm {
         let mut best: Option<Candidate> = None;
         let mut i = 0;
         let stop = (remaining.len() / 3).max(20).min(remaining_len);
-        for (word, count) in consider {
+        for (word, count) in consider.iter() {
             let mut totals = [0.0f64; MAX_MASK_ENUM];
             let mut in_remaining = false;
-            for (candidate, count) in &remaining {
-                in_remaining |= word == *candidate;
+            for (candidate, count) in remaining.iter() {
+                in_remaining |= word == candidate;
                 let idx = enumerate_mask(&Correctness::compute(candidate, word));
                 totals[idx] += count;
             }
