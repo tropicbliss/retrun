@@ -36,30 +36,38 @@ impl Algorithm {
             };
         }
         let sum: f64 = WORDS.into_iter().map(|(_, count)| *count as f64).sum();
-        let remaining: Vec<_> = WORDS
-            .into_iter()
-            .map(|(word, _)| word)
-            .filter(|word| {
-                history
-                    .iter()
-                    .all(|guess| guess.matches(word) && !blocked.contains(&(**word).to_string()))
-            })
-            .map(|word| (word, sigmoid(*WORDS.get(word).unwrap() as f64 / sum)))
-            .collect();
-        let remaining = Rc::new(remaining);
-        let remaining_len = remaining.len();
-        let score = history.len() as f64;
-        let consider = if easy_mode {
-            let result: Vec<_> = WORDS
+        let consider: Vec<_> = if easy_mode {
+            WORDS
                 .into_iter()
                 .map(|(word, _)| word)
                 .filter(|word| !blocked.contains(&(**word).to_string()))
                 .map(|word| (word, sigmoid(*WORDS.get(word).unwrap() as f64 / sum)))
+                .collect()
+        } else {
+            WORDS
+                .into_iter()
+                .map(|(word, _)| word)
+                .filter(|word| {
+                    history.iter().all(|guess| {
+                        guess.matches(word) && !blocked.contains(&(**word).to_string())
+                    })
+                })
+                .map(|word| (word, sigmoid(*WORDS.get(word).unwrap() as f64 / sum)))
+                .collect()
+        };
+        let consider = Rc::new(consider);
+        let remaining = if easy_mode {
+            let result: Vec<_> = consider
+                .iter()
+                .filter(|(word, _)| history.iter().all(|guess| guess.matches(word)))
+                .cloned()
                 .collect();
             Rc::new(result)
         } else {
-            Rc::clone(&remaining)
+            Rc::clone(&consider)
         };
+        let remaining_len = remaining.len();
+        let score = history.len() as f64;
         let remaining_p: f64 = remaining.iter().map(|(_, p)| p).sum();
         let remaining_entropy = -remaining
             .iter()
