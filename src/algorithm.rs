@@ -67,6 +67,12 @@ impl Algorithm {
             Rc::clone(&consider)
         };
         let remaining_len = remaining.len();
+        if remaining_len == 1 {
+            return Self {
+                guess: remaining.first().unwrap().0,
+                count: remaining_len,
+            };
+        }
         let score = history.len() as f64;
         let remaining_p: f64 = remaining.iter().map(|(_, p)| p).sum();
         let remaining_entropy = -remaining
