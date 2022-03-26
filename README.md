@@ -12,7 +12,7 @@ Output the best word and the number of eligible words in easy mode, while blocki
 retrun -e -b light -b night -c -- -----:00000,tares:21111,teach:21112,tweak:21111,might:13333
 ```
 
-The syntax of `state` is based on the syntax [Wordle botfights](https://botfights.ai/game/wordle) uses. Run `retrun --help` for more usage info.
+The syntax of `state` is based on the syntax [Wordle Botfights](https://botfights.ai/game/wordle) uses. Run `retrun --help` for more usage info.
 
 ## Building
 
