@@ -60,7 +60,7 @@ impl Algorithm {
             let result: Vec<_> = consider
                 .iter()
                 .filter(|(word, _)| history.iter().all(|guess| guess.matches(word)))
-                .cloned()
+                .copied()
                 .collect();
             Rc::new(result)
         } else {
