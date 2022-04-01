@@ -29,7 +29,7 @@ pub struct Algorithm {
 impl Algorithm {
     #[must_use]
     pub fn guess(history: &[Guess], blocked: &[String], easy_mode: bool) -> Self {
-        if history.is_empty() {
+        if history.is_empty() && !blocked.contains(&"tares".to_string()) {
             return Self {
                 guess: "tares",
                 count: WORDS.len(),
