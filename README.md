@@ -26,4 +26,4 @@ Compiling from source requires the latest stable version of Rust. Older Rust ver
 
 The binary will be located in `target/release`.
 
-Note: This project uses a build script (`build.rs` in this project's root) to generate a static HashMap at compile time.
+Note: This project uses a build script (`build.rs` at this project's root) to generate a static HashMap at compile time.
