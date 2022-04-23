@@ -36,35 +36,34 @@ impl Algorithm {
             };
         }
         let sum: f64 = WORDS.into_iter().map(|(_, count)| *count as f64).sum();
-        let consider: Vec<_> = if easy_mode {
-            WORDS
+        let (consider, remaining) = if easy_mode {
+            let consider: Vec<_> = WORDS
                 .into_iter()
                 .map(|(word, _)| word)
                 .filter(|word| !blocked.contains(&(**word).to_string()))
                 .map(|word| (word, sigmoid(*WORDS.get(word).unwrap() as f64 / sum)))
-                .collect()
-        } else {
-            WORDS
-                .into_iter()
-                .map(|(word, _)| word)
-                .filter(|word| {
-                    history.iter().all(|guess| {
-                        guess.matches(word) && !blocked.contains(&(**word).to_string())
-                    })
-                })
-                .map(|word| (word, sigmoid(*WORDS.get(word).unwrap() as f64 / sum)))
-                .collect()
-        };
-        let consider = Rc::new(consider);
-        let remaining = if easy_mode {
-            let result: Vec<_> = consider
+                .collect();
+            let remaining: Vec<_> = consider
                 .iter()
                 .filter(|(word, _)| history.iter().all(|guess| guess.matches(word)))
                 .copied()
                 .collect();
-            Rc::new(result)
+            (Rc::new(consider), Rc::new(remaining))
         } else {
-            Rc::clone(&consider)
+            let consider: Rc<Vec<_>> = Rc::new(
+                WORDS
+                    .into_iter()
+                    .map(|(word, _)| word)
+                    .filter(|word| {
+                        history.iter().all(|guess| {
+                            guess.matches(word) && !blocked.contains(&(**word).to_string())
+                        })
+                    })
+                    .map(|word| (word, sigmoid(*WORDS.get(word).unwrap() as f64 / sum)))
+                    .collect(),
+            );
+            let remaining = Rc::clone(&consider);
+            (consider, remaining)
         };
         let remaining_len = remaining.len();
         if remaining_len == 1 {
