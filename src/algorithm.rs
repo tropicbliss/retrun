@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use crate::{enumerate_mask, Correctness, Guess, MAX_MASK_ENUM};
 
 include!(concat!(env!("OUT_DIR"), "/dictionary.rs"));
@@ -36,34 +34,32 @@ impl Algorithm {
             };
         }
         let sum: f64 = WORDS.into_iter().map(|(_, count)| *count as f64).sum();
-        let (consider, remaining) = if easy_mode {
-            let consider: Vec<_> = WORDS
+        let consider: Vec<_> = if easy_mode {
+            WORDS
                 .into_iter()
                 .map(|(word, _)| word)
                 .filter(|word| !blocked.contains(&(**word).to_string()))
                 .map(|word| (word, sigmoid(*WORDS.get(word).unwrap() as f64 / sum)))
-                .collect();
-            let remaining: Vec<_> = consider
+                .collect()
+        } else {
+            WORDS
+                .into_iter()
+                .map(|(word, _)| word)
+                .filter(|word| {
+                    history.iter().all(|guess| {
+                        guess.matches(word) && !blocked.contains(&(**word).to_string())
+                    })
+                })
+                .map(|word| (word, sigmoid(*WORDS.get(word).unwrap() as f64 / sum)))
+                .collect()
+        };
+        let remaining: Vec<_> = if easy_mode {
+            consider
                 .iter()
                 .filter(|(word, _)| history.iter().all(|guess| guess.matches(word)))
-                .copied()
-                .collect();
-            (Rc::new(consider), Rc::new(remaining))
+                .collect()
         } else {
-            let consider: Rc<Vec<_>> = Rc::new(
-                WORDS
-                    .into_iter()
-                    .map(|(word, _)| word)
-                    .filter(|word| {
-                        history.iter().all(|guess| {
-                            guess.matches(word) && !blocked.contains(&(**word).to_string())
-                        })
-                    })
-                    .map(|word| (word, sigmoid(*WORDS.get(word).unwrap() as f64 / sum)))
-                    .collect(),
-            );
-            let remaining = Rc::clone(&consider);
-            (consider, remaining)
+            consider.iter().collect()
         };
         let remaining_len = remaining.len();
         if remaining_len == 1 {
