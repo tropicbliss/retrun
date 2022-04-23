@@ -12,3 +12,8 @@ phf = { version = "0.10.1", features = ["macros"] }
 
 [build-dependencies]
 phf_codegen = "0.10.0"
+
+[profile.release]
+strip = true
+lto = "fat"
+codegen-units = 1
