@@ -80,10 +80,10 @@ impl Algorithm {
         let mut best: Option<Candidate> = None;
         let mut i = 0;
         let stop = (remaining.len() / 3).max(20).min(remaining_len);
-        for (word, count) in consider.iter() {
+        for (word, count) in &consider {
             let mut totals = [0.0f64; MAX_MASK_ENUM];
             let mut in_remaining = false;
-            for (candidate, count) in remaining.iter() {
+            for (candidate, count) in &remaining {
                 in_remaining |= word == candidate;
                 let idx = enumerate_mask(&Correctness::compute(candidate, word));
                 totals[idx] += count;
