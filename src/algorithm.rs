@@ -33,13 +33,13 @@ impl Algorithm {
                 count: WORDS.len(),
             };
         }
-        let sum: f64 = WORDS.into_iter().map(|(_, count)| *count as f64).sum();
+        let sum: f64 = WORDS.into_iter().map(|(_, (count, _))| *count as f64).sum();
         let consider: Vec<_> = if easy_mode {
             WORDS
                 .into_iter()
                 .map(|(word, _)| word)
                 .filter(|word| !blocked.contains(&(**word).to_string()))
-                .map(|word| (word, sigmoid(*WORDS.get(word).unwrap() as f64 / sum)))
+                .map(|word| (word, sigmoid(WORDS.get(word).unwrap().0 as f64 / sum)))
                 .collect()
         } else {
             WORDS
@@ -50,7 +50,7 @@ impl Algorithm {
                         guess.matches(word) && !blocked.contains(&(**word).to_string())
                     })
                 })
-                .map(|word| (word, sigmoid(*WORDS.get(word).unwrap() as f64 / sum)))
+                .map(|word| (word, sigmoid(WORDS.get(word).unwrap().0 as f64 / sum)))
                 .collect()
         };
         let remaining: Vec<_> = if easy_mode {
@@ -62,10 +62,14 @@ impl Algorithm {
             consider.iter().collect()
         };
         let remaining_len = remaining.len();
-        if remaining_len == 1 {
+        let actual_remaining_len = remaining
+            .iter()
+            .filter(|(word, _)| WORDS.get(word).unwrap().1)
+            .count();
+        if actual_remaining_len == 1 {
             return Self {
                 guess: remaining.first().unwrap().0,
-                count: remaining_len,
+                count: actual_remaining_len,
             };
         }
         let score = history.len() as f64;
@@ -79,7 +83,7 @@ impl Algorithm {
             .sum::<f64>();
         let mut best: Option<Candidate> = None;
         let mut i = 0;
-        let stop = (remaining.len() / 3).max(20).min(remaining_len);
+        let stop = (remaining_len / 3).max(20).min(remaining_len);
         for (word, count) in &consider {
             let mut totals = [0.0f64; MAX_MASK_ENUM];
             let mut in_remaining = false;
@@ -120,7 +124,7 @@ impl Algorithm {
         }
         Self {
             guess: best.expect("Unable to find any words").word,
-            count: remaining_len,
+            count: actual_remaining_len,
         }
     }
 }
