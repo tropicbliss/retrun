@@ -43,11 +43,11 @@ pub fn get_guesses(state: &str) -> Vec<Guess> {
             let mut guess_data = guess.split(':');
             let word = guess_data
                 .next()
-                .expect("Word segment not found")
+                .expect("word segment not found")
                 .to_string();
             let raw_mask = guess_data
                 .next()
-                .expect("Mask segment not found")
+                .expect("mask segment not found")
                 .as_bytes();
             let mut mask = [Correctness::Correct; 5];
             for (idx, l) in raw_mask.iter().enumerate() {
@@ -55,7 +55,7 @@ pub fn get_guesses(state: &str) -> Vec<Guess> {
                     b'1' => Correctness::Wrong,
                     b'2' => Correctness::Misplaced,
                     b'3' => Correctness::Correct,
-                    _ => unimplemented!("Invalid mask character"),
+                    _ => unimplemented!("invalid mask character"),
                 };
                 mask[idx] = correctness;
             }

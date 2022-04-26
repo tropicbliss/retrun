@@ -123,7 +123,7 @@ impl Algorithm {
             }
         }
         Self {
-            guess: best.expect("Unable to find any words").word,
+            guess: best.expect("unable to find any words").word,
             count: actual_remaining_len,
         }
     }
