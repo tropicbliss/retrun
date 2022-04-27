@@ -30,7 +30,7 @@ impl Algorithm {
         if history.is_empty() && !blocked.contains(&"tares".to_string()) {
             return Self {
                 guess: "tares",
-                count: WORDS.len(),
+                count: WORDS.into_iter().filter(|(_, (_, easy))| *easy).count(),
             };
         }
         let sum: f64 = WORDS.into_iter().map(|(_, (count, _))| *count as f64).sum();
