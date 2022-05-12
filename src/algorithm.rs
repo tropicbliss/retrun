@@ -66,6 +66,9 @@ impl Algorithm {
             .iter()
             .filter(|(word, _)| WORDS.get(word).unwrap().1)
             .count();
+        if actual_remaining_len == 0 {
+            panic!("unable to find any words");
+        }
         if actual_remaining_len == 1 {
             return Self {
                 guess: remaining.first().unwrap().0,
